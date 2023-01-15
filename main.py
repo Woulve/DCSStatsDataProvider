@@ -66,7 +66,7 @@ def getDecoded(file, response):
                 LOGGER.error("Couldn't read "+slmodStats_File)
                 raise HTTPException(status_code=500)
             else:
-                return luadecoded
+                return luadecoded["stats"]
     
 
 
@@ -86,7 +86,6 @@ def get_lua_from_webdav():
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
-    print(lastFetchSuccessful.getLastFetchSuccessful())
     LOGGER.debug("Processing...")
     start_time = time.time()
     response = await call_next(request)
@@ -98,7 +97,7 @@ async def getData(request: Request, call_next):
 
 @app.get("/")
 async def root(response: Response):
-    return {"message": getDecoded(SlmodStatsFiles.slmodStats_File, response)}
+    return {"stats" : getDecoded(SlmodStatsFiles.slmodStats_File, response)}
 
 @app.get("/players")
 async def PlayersList():

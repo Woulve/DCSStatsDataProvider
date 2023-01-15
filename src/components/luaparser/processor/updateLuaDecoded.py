@@ -17,6 +17,8 @@ def recursive_dict_merge(dict1, dict2):
 
 #makes a list of keys and a value into a usable python dict, like {'stats': {'ef202237873822643b1f533fc865a353': {'times': {'F-14B':{'total':10.005}}}}}
 def array_to_dict(keys, value):
+    if isinstance(value, str) and '.' in value:
+        value = float(value)
     for key in reversed(keys):
         value = {key: value}
     return value
@@ -35,6 +37,7 @@ def convert_lua_notation_to_python(lua):
     value = re.sub(r" ", "", value)
     value = re.sub(r'true', 'True', value)
     value = re.sub(r'false', 'False', value)
+    
     if re.match(r"\{", value):#if value is a dict
         value = re.sub(r"\[", "", value)
         value = re.sub(r"\]", "", value)
@@ -50,4 +53,5 @@ def updateLuaDecoded(luadecoded_serialized, luadecoded_additions):
                 luadecoded_serialized = recursive_dict_merge(luadecoded_serialized, convert_lua_notation_to_python(addition))
             except:
                 return ''
+
     return luadecoded_serialized

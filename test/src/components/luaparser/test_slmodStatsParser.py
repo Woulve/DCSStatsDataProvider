@@ -1,14 +1,8 @@
 from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
-import logging
+from src.util.serverlogger import serverLogger
 import json
 
-LOGGER = logging.getLogger(__name__)
-# import unittest
-
-# class test_slmodStatsParser(unittest.TestCase):
-#     def test_json(self):
-#         self.assertEqual(sum([1, 2, 3]), 6, "Should be 6")
-#         print("json!")
+LOGGER = serverLogger()
 
 class TestSLModStatsParser:
     def returns_valid_json(self, json_text):

@@ -1,7 +1,8 @@
+from src.components.luaparser.processor.updateLuaDecoded import recursive_dict_merge
+
 
 def addTotalTime(luadecoded):
     for type in luadecoded:
-        # print(luadecoded[type])
         for ucid in luadecoded[type]:
             totalTime = 0
             for aircrafttimes in luadecoded[type][ucid]["times"]:
