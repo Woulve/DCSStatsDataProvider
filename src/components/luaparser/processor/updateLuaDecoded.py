@@ -32,6 +32,9 @@ def convert_lua_notation_to_python(lua):
     assignment_list = assignment.split(",")
     assignment_list.insert(0, tablename)
     value = lua.split(" = ", 1)[1]
+    value = re.sub(r" ", "", value)
+    value = re.sub(r'true', 'True', value)
+    value = re.sub(r'false', 'False', value)
     if re.match(r"\{", value):#if value is a dict
         value = re.sub(r"\[", "", value)
         value = re.sub(r"\]", "", value)
@@ -43,5 +46,8 @@ def updateLuaDecoded(luadecoded_serialized, luadecoded_additions):
     additions_list = luadecoded_additions.split("\n")
     for addition in additions_list:
         if addition != "":
-            luadecoded_serialized = recursive_dict_merge(luadecoded_serialized, convert_lua_notation_to_python(addition))
+            try:
+                luadecoded_serialized = recursive_dict_merge(luadecoded_serialized, convert_lua_notation_to_python(addition))
+            except:
+                return ''
     return luadecoded_serialized

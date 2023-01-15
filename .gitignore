@@ -1,3 +1,7 @@
+run_app.bat
+SlmodStats.lua
+.pyc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
