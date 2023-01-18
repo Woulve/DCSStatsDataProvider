@@ -5,6 +5,7 @@ from src.util.webDAV import getFileFromWebDAV
 from src.util.serverlogger import serverLogger
 import time
 import configparser
+import uvicorn
 
 
 from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
@@ -14,9 +15,9 @@ from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
 
 from src.components.data.SlmodStats.Rankings.playerRankingByFlighTime import getPlayerRankingByFlightTime;
 
+
 app = FastAPI()
 
-# logging.basicConfig(filename="serverlog.log", format='%(asctime)s %(message)s', filemode='a')
 
 LOGGER = serverLogger()
 
@@ -25,6 +26,7 @@ origins = [
     "http://localhost:8080",
     "http://localhost:3000",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -113,8 +115,11 @@ async def PlayerDataByName(name):
 
 @app.get("/playerrankingbyflighttime")
 async def PlayerRankingByFlightTime():
-    return {"ranking" : getPlayerRankingByFlightTime(luadecoded, 10)}
+    return {"ranking" : getPlayerRankingByFlightTime(luadecoded)}
 
 @app.get("/lastfetchsuccessful")
 async def LastFetchSuccessful():
     return { "lastFetchSuccessful" : lastFetchSuccessful.getLastFetchSuccessful() }
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

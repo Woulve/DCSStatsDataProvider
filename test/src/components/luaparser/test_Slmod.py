@@ -5,6 +5,8 @@ import json
 LOGGER = serverLogger()
 
 class TestSLModStatsParser:
+    def testadd(self):
+        assert 1 == 1, "1 == 1"
     def returns_valid_json(self, json_text):
         try:
             json.loads(json_text)

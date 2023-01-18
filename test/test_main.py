@@ -1,4 +1,4 @@
-
+import src.components.luaparser.slmodStatsParser as slmodStatsParser
 class TestMain:
     def inc(self, x):
         return x + 1
