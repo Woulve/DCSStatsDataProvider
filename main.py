@@ -49,18 +49,16 @@ class LastFetchSuccessful():
 lastFetchSuccessful = LastFetchSuccessful();
 
 def getDecoded(file, response):
-    config = configparser.ConfigParser()
-    config.read('config.cfg')
 
     slmodStats_File = SlmodStatsFiles.slmodStats_File
 
-    if config["configuration"]["enablerealtimeupdates"] == "True":
+    if getConfigValue("enablerealtimeupdates") == "True":
         response.headers["Realtimeupdates"] = "True"
         enablerealtimeupdates = True
     else:
         enablerealtimeupdates = False
         response.headers["Realtimeupdates"] = "False"
-        
+
     match file:
         case slmodStats_File:
             luadecoded = getLuaDecoded_slmodStats(enablerealtimeupdates)
@@ -69,22 +67,26 @@ def getDecoded(file, response):
                 raise HTTPException(status_code=500)
             else:
                 return luadecoded["stats"]
-    
 
+def getConfigValue(value: str):
+    config = configparser.ConfigParser()
+    config.read('config.cfg')
+    return config["configuration"][value]
 
 luadecoded = getLuaDecoded_slmodStats(False)
 
 @app.on_event("startup")
 @repeat_every(seconds=600)
 def get_lua_from_webdav():
-    if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File) == 0:
-        lastFetchSuccessful.setLastFetchSuccessful(False)
-        LOGGER.exception("Couldn't fetch "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
-        raise HTTPException(status_code=500)
-    else:
-        lastFetchSuccessful.setLastFetchSuccessful(True)
-        LOGGER.info("Successfully fetched "+SlmodStatsFiles.slmodStats_File)
-    
+    if getConfigValue("enablewebdavfetching") == "True":
+        if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File) == 0:
+            lastFetchSuccessful.setLastFetchSuccessful(False)
+            LOGGER.exception("Couldn't fetch "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
+            raise HTTPException(status_code=500)
+        else:
+            lastFetchSuccessful.setLastFetchSuccessful(True)
+            LOGGER.info("Successfully fetched "+SlmodStatsFiles.slmodStats_File)
+
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
@@ -99,6 +101,7 @@ async def getData(request: Request, call_next):
 
 @app.get("/")
 async def root(response: Response):
+    # print("AAAAAAAAS")
     return {"stats" : getDecoded(SlmodStatsFiles.slmodStats_File, response)}
 
 @app.get("/players")

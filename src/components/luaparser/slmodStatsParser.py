@@ -17,7 +17,8 @@ def getLuaDecoded_slmodStats(update):
     except:
         return None
     filecontent = f.read()
-    f.close() 
+
+    f.close()
     if filecontent == "":
         return None
 
@@ -28,11 +29,12 @@ def getLuaDecoded_slmodStats(update):
 
     if update == True:
             updatedLua = updateLuaDecoded(luadecoded_serialized, luadecoded_additions)
+            # print(updatedLua)
             if updatedLua != '':
                 LOGGER.info("Successfully updated serialized lua")
                 return process(updatedLua)
             else:
-                LOGGER.error("!!!!Error updating serialized lua!!!!")
+                LOGGER.error("Error updating serialized lua")
                 return process(luadecoded_serialized)
     else:
         luadecoded_serialized = process(luadecoded_serialized)

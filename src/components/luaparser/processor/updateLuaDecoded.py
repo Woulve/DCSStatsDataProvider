@@ -1,9 +1,9 @@
 import re
 import ast
+import json
 
 ##The slmod log file contains an initial array, and every event is appended to the file as a lua assignment.
 #So to get new data, which is not yet serialized into the first lua dict, we have to modify the dict for every line after the initial dict in the log file.
-#This might cause performance issues for very long log files, because we have to loop over the whole file.
 #This can be toggled in the config file by setting 'enablerealtimeupdates' to false.
 
 #Merge two dicts together. dict.update doesn't work, for whatever reason (might be because of the lua.decode), so we have to do it manually.
@@ -15,37 +15,42 @@ def recursive_dict_merge(dict1, dict2):
             dict1[key] = dict2[key]
     return dict1
 
-#makes a list of keys and a value into a usable python dict, like {'stats': {'ef202237873822643b1f533fc865a353': {'times': {'F-14B':{'total':10.005}}}}}
-def array_to_dict(keys, value):
-    if (value.isnumeric()):
-        value = int(value)
-    if isinstance(value, str) and '.' in value:
-        value = float(value)
-    for key in reversed(keys):
-        value = {key: value}
-    return value
+def convert_lua_notation_to_python(lua_string: str):
 
-#changes the lua notation of e.g. stats["ef202237873822643b1f533fc865a353"]["times"]["F-14B"]["total"] = 10.005 to be a list of each key, with the value
-def convert_lua_notation_to_python(lua):
-    assignment = lua.split(" = ", 1)[0]
-    tablename = re.match(r"^\w+", assignment).group()
-    assignment = re.sub(r"^\w+\[", "[", assignment)
-    assignment = re.sub(r'\"\]\[\"', ',', assignment)
-    assignment = re.sub(r'\[\"', '', assignment)
-    assignment = re.sub(r'\"\]', '', assignment)
-    assignment_list = assignment.split(",")
-    assignment_list.insert(0, tablename)
-    value = lua.split(" = ", 1)[1]
-    value = re.sub(r" ", "", value)
-    value = re.sub(r'true', 'True', value)
-    value = re.sub(r'false', 'False', value)
+    python_obj = {}
 
-    if re.match(r"\{", value):#if value is a dict
-        value = re.sub(r"\[", "", value)
-        value = re.sub(r"\]", "", value)
-        value = re.sub(r"\=", ":", value)
-        value = ast.literal_eval(value)
-    return array_to_dict(assignment_list, value)
+    try:
+        # Split the string by '=' to separate the variable name and value
+        variable, value = lua_string.strip().split(' = ', 1)
+
+        # Validate the input string by checking if it's a correct lua assignment
+        if not variable.startswith('stats[') or not variable.endswith(']'):
+            raise ValueError('Invalid lua assignment')
+
+        # Split the variable name by '[' and ']' to separate the keys
+        keys = [k.strip('"]') for k in variable.split('[') if k]
+
+        # Validate the keys by checking if they are enclosed in double quotes
+        for key in keys:
+            key = key.strip('"')
+
+        # Create a nested dictionary based on the keys
+        current_dict = python_obj
+        for key in keys[:-1]:
+            current_dict = current_dict.setdefault(key, {})
+
+        # Evaluate the value
+        try:
+            value = value.replace('[','').replace(']','').replace(' = ',' : ') #object
+            value = value.replace('nil','None') #None
+            value = ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            pass
+        current_dict[keys[-1]] = value
+    except Exception as e:
+        print(f"An error occured while parsing the string: {e}")
+    return python_obj
+
 
 def updateLuaDecoded(luadecoded_serialized, luadecoded_additions):
     additions_list = luadecoded_additions.split("\n")
@@ -54,6 +59,6 @@ def updateLuaDecoded(luadecoded_serialized, luadecoded_additions):
             try:
                 luadecoded_serialized = recursive_dict_merge(luadecoded_serialized, convert_lua_notation_to_python(addition))
             except:
-                return ''
+                return luadecoded_serialized
 
     return luadecoded_serialized
