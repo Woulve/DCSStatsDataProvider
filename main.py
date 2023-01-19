@@ -1,19 +1,19 @@
+import time
+import uvicorn
+import os
 from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
+
 from src.util.webDAV import getFileFromWebDAV
 from src.util.serverlogger import serverLogger
-import time
-import configparser
-import uvicorn
-
-
+from src.util.getConfigValue import getConfigValue
 from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
 from src.components.data.SlmodStats.playerData import getPlayersList
 from src.components.data.SlmodStats.playerData import getPlayerDataByUCID
 from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
-
-from src.components.data.SlmodStats.Rankings.playerRankingByFlighTime import getPlayerRankingByFlightTime;
+from src.util.realweather.run_weatherupdate import update_miz_weather
+from src.components.data.SlmodStats.Rankings.playerRankingByFlightTime import getPlayerRankingByFlightTime;
 
 
 app = FastAPI()
@@ -68,24 +68,27 @@ def getDecoded(file, response):
             else:
                 return luadecoded["stats"]
 
-def getConfigValue(value: str):
-    config = configparser.ConfigParser()
-    config.read('config.cfg')
-    return config["configuration"][value]
+def updateWeather():
+    update_miz_weather()
+    mypath = os.path.abspath(os.path.dirname(__file__))
+    os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
 
 luadecoded = getLuaDecoded_slmodStats(False)
 
 @app.on_event("startup")
 @repeat_every(seconds=600)
-def get_lua_from_webdav():
+def repeated():
+    if getConfigValue("enableweatherchanges") == "True":
+        updateWeather()
+
     if getConfigValue("enablewebdavfetching") == "True":
-        if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File) == 0:
+        if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File, "./SlmodStats.lua") == 0:
             lastFetchSuccessful.setLastFetchSuccessful(False)
             LOGGER.exception("Couldn't fetch "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
             raise HTTPException(status_code=500)
         else:
             lastFetchSuccessful.setLastFetchSuccessful(True)
-            LOGGER.info("Successfully fetched "+SlmodStatsFiles.slmodStats_File)
+            LOGGER.info("Successfully fetched "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
 
 
 @app.middleware("http")
@@ -101,7 +104,6 @@ async def getData(request: Request, call_next):
 
 @app.get("/")
 async def root(response: Response):
-    # print("AAAAAAAAS")
     return {"stats" : getDecoded(SlmodStatsFiles.slmodStats_File, response)}
 
 @app.get("/players")

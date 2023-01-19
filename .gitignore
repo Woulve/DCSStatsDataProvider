@@ -6,6 +6,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.miz
+*.exe
+config.json
+weather_last_time_updated.txt
+
 # C extensions
 *.so
 
