@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.util.webDAV import getFileFromWebDAV
+from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 from src.util.serverlogger import serverLogger
 from src.util.getConfigValue import getConfigValue
 from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
@@ -69,14 +69,26 @@ def getDecoded(file, response):
                 return luadecoded["stats"]
 
 def updateWeather():
+    #when enablemizfilefetching is true, we fetch the active_mission.miz from the webdav server and update the weather in it.
+    #If it is false, we use the local files in the realweather/Active folder.
+    if getConfigValue("enablemizfilefetching") == "True":
+        if (getFileFromWebDAV("Active/active_mission.miz", "./src/util/realweather/Active/active_mission.miz")) == 0:
+            LOGGER.error("Couldn't fetch active_mission.miz from WEBDav server.")
+
     update_miz_weather()
+
     mypath = os.path.abspath(os.path.dirname(__file__))
     os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
+
+    if getConfigValue("enablemizfilefetching") == "True":
+        if (pushFileToWebdav("Active/realweather.miz", "./src/util/realweather/Active/realweather.miz")) == 0:
+            LOGGER.error("Couldn't push realweather.miz to WEBDav server.")
+
 
 luadecoded = getLuaDecoded_slmodStats(False)
 
 @app.on_event("startup")
-@repeat_every(seconds=600)
+@repeat_every(seconds=60 * 30) #every 30 minutes
 def repeated():
     if getConfigValue("enableweatherchanges") == "True":
         updateWeather()

@@ -10,6 +10,7 @@ __pycache__/
 *.exe
 config.json
 weather_last_time_updated.txt
+settings.json
 
 # C extensions
 *.so

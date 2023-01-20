@@ -1,7 +1,11 @@
 from webdav3.client import Client
+from src.util.serverlogger import serverLogger
+from webdav3.exceptions import WebDavException
 import os
 from dotenv import load_dotenv
 import urllib3
+
+LOGGER = serverLogger()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -18,12 +22,44 @@ def getFileFromWebDAV(file, localpath):
     client = Client(options)
     client.verify = False
     if client.check(file):
-        client.download_sync(remote_path=file, local_path=localpath)
+        try:
+            client.download_sync(remote_path=file, local_path=localpath)
+            LOGGER.info("Successfully fetched "+file+" from WEBDav server to: "+localpath)
+        except WebDavException as e:
+            LOGGER.error("Couldn't fetch file from webdav server: "+str(e))
+            return 0
         return 1
     else:
         return 0
 
-def pushFileToWebdav(file, content):
+def pushFileToWebdav(remotepath, localpath):
     client = Client(options)
     client.verify = False
-    client.upload_sync(remote_path=file, local_path=content)
+    try:
+        client.upload_sync(remote_path=remotepath, local_path=localpath)
+        LOGGER.info("Successfully pushed "+localpath+" to WEBDav server: "+remotepath)
+        return 1
+    except WebDavException as e:
+        LOGGER.error("Couldn't push file to webdav server: "+str(e))
+        return 0
+
+def checkExists(file):
+    client = Client(options)
+    client.verify = False
+    try:
+        return client.check(file)
+    except:
+        LOGGER.error("Couldn't check if file exists: "+file)
+
+# def getActiveFolder(folder):
+#     client = Client(options)
+#     client.verify = False
+#     try:
+#         if (checkExists("Active")):
+#             getFileFromWebDAV("Active", "active")
+#             return client.list(folder)
+#         else:
+#             raise Exception("Active folder not found")
+#     except:
+#         LOGGER.error("Active folder not found")
+#         return 0
