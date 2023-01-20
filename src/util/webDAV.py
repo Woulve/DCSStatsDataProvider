@@ -11,7 +11,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 load_dotenv()
 
-
+#To use webdav, you need to set the following environment variables in a .env file in the root folder:
 options = {
  'webdav_hostname': os.getenv("WEBDAV_HOSTNAME"),
  'webdav_login':    os.getenv("WEBDAV_LOGIN"),

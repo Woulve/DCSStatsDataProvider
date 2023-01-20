@@ -40,7 +40,7 @@ def check_if_weather_update_is_needed():
         return True
 
 def update_miz_weather():
-
+    #If you want to use real weather, you need to set the CHECKWX_APIKEY environment variables in a .env file in the root folder.
     values = {
         "api-key" : os.getenv("CHECKWX_APIKEY"),
         "icao" : getConfigValue("icao"),
@@ -66,15 +66,15 @@ def update_miz_weather():
 
         with open("config.json", "w+") as outfile:
             outfile.write(json_object)
-        result = subprocess.run([activepath+"/realweather.exe"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run([activepath+"/DCS-real-weather"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = result.stdout.decode()
         if "Removed mission_unpacked" in output:
             with open("weather_last_time_updated.txt", "w+") as datefile:
                 datefile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the realweather.exe output)")
+                LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the DCS-real-weather output)")
             return True
         else:
-            LOGGER.error("Error: realweather.exe output didn't contain \"Removed mission_unpacked\". Realweather.exe output: " + output)
+            LOGGER.error("Error: realweather.exe output didn't contain \"Removed mission_unpacked\". DCS-real-weather output: " + output)
             return False
     except:
         # handle other possible errors
