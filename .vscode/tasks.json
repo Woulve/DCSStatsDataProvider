@@ -1,0 +1,18 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🔄 Update requirements.txt",
+            "type": "shell",
+            "command": "pipreqs --force"
+        },
+        {
+            "label": "🌐 Get raspberry IP",
+            "type": "shell",
+            "command": "ping raspberrypi.local",
+            "problemMatcher": []
+        }
+    ]
+}

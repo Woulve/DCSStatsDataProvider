@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  dcsstats:
+    image: dcsstatsbackend:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./serverlog.log:/DCSStats/serverlog.log
+      - ./config.cfg:/DCSStats/config.cfg
+      - ./src/util/realweather/:/DCSStats/src/util/realweather/
+    environment:
+      - TZ=Europe/Berlin

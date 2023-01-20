@@ -30,14 +30,13 @@ def check_if_weather_update_is_needed():
         with open("weather_last_time_updated.txt", "r") as datefile:
             last_time_updated = datefile.read()
             if over_12_hours(last_time_updated, datetime.now().strftime("%d/%m/%Y %H:%M:%S")):
-                LOGGER.info("Weather update needed.")
-                print("Weather update needed.")
+                LOGGER.info("Weather update needed, over 12 hours since last update.")
                 return True
             else:
-                LOGGER.info("Weather update not needed.")
+                LOGGER.info("Weather update not needed, less than 12 hours since last update.")
                 return False
     except:
-        LOGGER.info("Weather update needed.")
+        LOGGER.info("Weather update needed, no weather_last_time_updated.txt file found.")
         return True
 
 def update_miz_weather():
@@ -69,11 +68,14 @@ def update_miz_weather():
             outfile.write(json_object)
         result = subprocess.run([activepath+"/realweather.exe"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = result.stdout.decode()
-
-
-        with open("weather_last_time_updated.txt", "w+") as datefile:
-            datefile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-        return True
+        if "Removed mission_unpacked" in output:
+            with open("weather_last_time_updated.txt", "w+") as datefile:
+                datefile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the realweather.exe output)")
+            return True
+        else:
+            LOGGER.error("Error: realweather.exe output didn't contain \"Removed mission_unpacked\". Realweather.exe output: " + output)
+            return False
     except:
         # handle other possible errors
         LOGGER.error("Error: An error occurred while updating weather.")
