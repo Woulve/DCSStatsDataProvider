@@ -7,13 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 from src.util.serverlogger import serverLogger
-from src.util.getConfigValue import getConfigValue
+from src.util.getConfigValue import getConfigValue, getAllCongigValues
 from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
 from src.components.data.SlmodStats.playerData import getPlayersList
 from src.components.data.SlmodStats.playerData import getPlayerDataByUCID
 from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
+from src.components.data.SlmodStats.allPlayerStats import getAllPlayerStats
 from src.util.realweather.run_weatherupdate import update_miz_weather
 from src.components.data.SlmodStats.Rankings.playerRankingByFlightTime import getPlayerRankingByFlightTime;
+from src.components.data.SlmodStats.Rankings.playerRankingByPoints import getPlayerRankingByPoints;
+from src.util.realweather.run_weatherupdate import check_if_weather_update_is_needed
 
 
 app = FastAPI()
@@ -36,7 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class SlmodStatsFiles():
+class SlmodStatsFiles(): #remote lcoation of the slmodstats file
     slmodStats_File = "Slmod/SlmodStats.lua"
 
 class LastFetchSuccessful():
@@ -69,23 +72,38 @@ def getDecoded(file, response):
                 return luadecoded["stats"]
 
 def updateWeather():
-    #when enablemizfilefetching is true, we fetch the active_mission.miz from the webdav server and update the weather in it.
+    #when enablemizfilefetching is true, we fetch the mission.miz from the webdav server and update the weather in it.
     #If it is false, we use the local files in the realweather/Active folder.
     if getConfigValue("enablemizfilefetching") == "True":
-        if (getFileFromWebDAV("Active/active_mission.miz", "./src/util/realweather/Active/active_mission.miz")) == 0:
-            LOGGER.error("Couldn't fetch active_mission.miz from WEBDav server.")
+        if check_if_weather_update_is_needed():
+            if (getFileFromWebDAV("Active/mission.miz", "./src/util/realweather/Active/mission.miz")) == 0:
+                LOGGER.error("Couldn't fetch mission.miz from WEBDav server.")
+                return
+        else:
+            mypath = os.path.abspath(os.path.dirname(__file__))
+            os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
+            return
+    else:
+        return
 
     update_miz_weather()
 
     mypath = os.path.abspath(os.path.dirname(__file__))
     os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
 
-    if getConfigValue("enablemizfilefetching") == "True":
-        if (pushFileToWebdav("Active/realweather.miz", "./src/util/realweather/Active/realweather.miz")) == 0:
-            LOGGER.error("Couldn't push realweather.miz to WEBDav server.")
+    if (pushFileToWebdav("Active/foothold_remastered_realweather.miz", "./src/util/realweather/Active/foothold_remastered_realweather.miz")) == 0:
+        LOGGER.error("Couldn't push foothold_remastered_realweather.miz to WEBDav server.")
+        return
 
 
 luadecoded = getLuaDecoded_slmodStats(False)
+
+@app.on_event("startup")
+def show_config():
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    ENDC = '\033[0m'
+    print(getAllCongigValues("configuration"))
 
 @app.on_event("startup")
 @repeat_every(seconds=60 * 30) #every 30 minutes
@@ -96,11 +114,9 @@ def repeated():
     if getConfigValue("enablewebdavfetching") == "True":
         if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File, "./SlmodStats.lua") == 0:
             lastFetchSuccessful.setLastFetchSuccessful(False)
-            LOGGER.exception("Couldn't fetch "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
             raise HTTPException(status_code=500)
         else:
             lastFetchSuccessful.setLastFetchSuccessful(True)
-            LOGGER.info("Successfully fetched "+SlmodStatsFiles.slmodStats_File+" from WEBDav server.")
 
 
 @app.middleware("http")
@@ -134,9 +150,17 @@ async def PlayerDataByName(name):
 async def PlayerRankingByFlightTime():
     return {"ranking" : getPlayerRankingByFlightTime(luadecoded)}
 
+@app.get("/playerrankingbypoints")
+async def PlayerRankingByFlightTime():
+    return {"ranking" : getPlayerRankingByPoints(luadecoded)}
+
 @app.get("/lastfetchsuccessful")
 async def LastFetchSuccessful():
     return { "lastFetchSuccessful" : lastFetchSuccessful.getLastFetchSuccessful() }
+
+@app.get("/allplayerstats")
+async def AllPlayerStats():
+    return { "allPlayerStats" : getAllPlayerStats(luadecoded) }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
