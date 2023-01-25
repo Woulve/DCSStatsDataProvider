@@ -50,16 +50,3 @@ def checkExists(file):
         return client.check(file)
     except:
         LOGGER.error("Couldn't check if file exists: "+file)
-
-# def getActiveFolder(folder):
-#     client = Client(options)
-#     client.verify = False
-#     try:
-#         if (checkExists("Active")):
-#             getFileFromWebDAV("Active", "active")
-#             return client.list(folder)
-#         else:
-#             raise Exception("Active folder not found")
-#     except:
-#         LOGGER.error("Active folder not found")
-#         return 0

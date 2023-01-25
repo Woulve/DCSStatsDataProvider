@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   dcsstats:
-    image: dcsstatsbackend:latest
+    image: woulve/dcsstatsbackend:latest
     ports:
       - "8000:8000"
     volumes:

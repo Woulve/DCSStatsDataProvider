@@ -4,44 +4,49 @@ from src.util.serverlogger import serverLogger
 LOGGER = serverLogger()
 
 def getAllPlayerStats(luadecoded):
-    playerStats = {}
     if luadecoded is None:
         return None
-    else:
-        for type in luadecoded:
-            for ucid in luadecoded[type]:
-                joinDate = 0
-                lastjoin = 0
-                joinDate = luadecoded["stats"][ucid]["joinDate"]
-                lastjoin = luadecoded["stats"][ucid]["lastJoin"]
-                totalPoints = luadecoded["stats"][ucid]["totalPoints"]
-                totalFlightTime = luadecoded["stats"][ucid]["times"]["totalFlightTime"]
-                lastUsedName = list(luadecoded["stats"][ucid]["names"].values())[-1]
-                playerStats[lastUsedName] = {}
-                playerStats[lastUsedName]["joinDate"] = joinDate
-                playerStats[lastUsedName]["lastJoin"] = lastjoin
-                playerStats[lastUsedName]["totalPoints"] = totalPoints
-                playerStats[lastUsedName]["totalFlightTime"] = totalFlightTime
-                try:
-                    for aircrafttimes in luadecoded[type][ucid]["times"]:
-                        for aircraftname in luadecoded[type][ucid]["times"].keys():
-                            if aircraftname == "totalFlightTime":
-                                continue
-                            playerStats[lastUsedName][aircraftname] = {}
-                            playerStats[lastUsedName][aircraftname]["total"] = luadecoded[type][ucid]["times"][aircraftname]["total"]
-                            playerStats[lastUsedName][aircraftname]["kills"] = {}
-                            playerStats[lastUsedName][aircraftname]["actions"] = {}
-                            try:
-                                for killedtype in luadecoded[type][ucid]["times"][aircraftname]["kills"]:
-                                    playerStats[lastUsedName][aircraftname]["kills"][killedtype] = luadecoded[type][ucid]["times"][aircraftname]["kills"][killedtype]
-                            except:
-                                continue
-                            try:
-                                for actions in luadecoded[type][ucid]["times"][aircraftname]["actions"]:
-                                    playerStats[lastUsedName][aircraftname]["actions"][actions] = luadecoded[type][ucid]["times"][aircraftname]["actions"][actions]
-                            except:
-                                continue
-                except:
-                    LOGGER.error("Error getting player stats")
-                    raise HTTPException(status_code=500)
-        return sorted(playerStats.items(), key=lambda x:x[1]["totalPoints"], reverse=True)
+
+    player_stats = {}
+
+    for ucid, player_data in luadecoded.get("stats", {}).items():
+        a2akillstotal = 0
+        a2gkillstotal = 0
+        deathstotal = 0
+        player_name = player_data["names"][list(player_data["names"].keys())[-1]]
+
+        for aircraftname, aircraft_data in player_data.get("times", {}).items():
+            if aircraftname == "totalFlightTime":
+                continue
+            a2akillstotal += aircraft_data.get("kills", {}).get("Planes", {}).get("total", 0)
+            a2akillstotal += aircraft_data.get("kills", {}).get("Helicopters", {}).get("total", 0)
+            a2gkillstotal += aircraft_data.get("kills", {}).get("Ground Units", {}).get("total", 0)
+            deathstotal += aircraft_data.get("actions", {}).get("losses", {}).get("pilotDeath", 0)
+
+        player_stats[player_name] = {
+            "join_date": player_data.get("joinDate"),
+            "last_join": player_data.get("lastJoin"),
+            "total_points": player_data.get("totalPoints", 0),
+            "total_a2akills": a2akillstotal,
+            "total_a2gkills": a2gkillstotal,
+            "total_deaths": deathstotal,
+            "total_flight_time": player_data.get("times", {}).get("totalFlightTime", 0),
+            "aircraft_stats": extract_aircraft_stats(player_data.get("times"))
+        }
+    # return player_stats
+    return sorted(player_stats.items(), key=lambda x: x[1]['total_points'], reverse=True)
+
+def extract_aircraft_stats(times):
+    aircraft_stats = {}
+    for aircraftname, aircraft_data in times.items():
+        if aircraftname == "totalFlightTime":
+            continue
+        aircraft_stats[aircraftname] = {
+            "total": aircraft_data.get("total", 0),
+            "actions": aircraft_data.get("action", {}),
+            "kills": {
+                killedtype: kills_data.get("total", 0)
+                for killedtype, kills_data in aircraft_data.get("kills", {}).items()
+            }
+        }
+    return aircraft_stats
