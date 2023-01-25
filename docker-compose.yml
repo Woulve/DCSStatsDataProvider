@@ -19,5 +19,6 @@ services:
     environment:
       - TZ=Europe/Berlin
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.whoami.rule=Host(`dcsstatsbackend.localhost`)
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule= Host(`pi.local`) && PathPrefix(`/whoami`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
