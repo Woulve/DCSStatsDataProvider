@@ -7,7 +7,6 @@ import pathlib
 LOGGER = serverLogger()
 
 def getConfigValue(category: str, value: str):
-    print(category, value)
     config = configparser.ConfigParser()
     config.read('config.cfg')
     # if config[category][value] == None:

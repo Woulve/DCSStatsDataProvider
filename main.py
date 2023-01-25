@@ -2,7 +2,7 @@ import time
 import uvicorn
 import os
 
-from fastapi import FastAPI, Request, HTTPException, Response
+from fastapi import FastAPI, Request, HTTPException, Response, Header
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
@@ -11,6 +11,9 @@ from fastapi_cache.decorator import cache
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
+from datetime import date
+import base64
 
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 from src.util.serverlogger import serverLogger
@@ -110,7 +113,7 @@ def startup():
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     ENDC = '\033[0m'
-    print(getAllConfigValues("configuration"))
+    # print(getAllConfigValues("configuration"))
 
 @app.on_event("startup")
 @repeat_every(seconds=60 * 30) #every 30 minutes
@@ -125,9 +128,22 @@ def repeated():
         else:
             lastFetchSuccessful.setLastFetchSuccessful(True)
 
+def getAuth(request: Request):
+    if request.method == "GET" or request.method == "POST":
+        datet = date.today().strftime("%Y%m%d")
+        try:
+            auth_header = request.headers.get("Authentication")
+            dec = base64.b64decode(auth_header)
+            if dec != datet.encode():
+                raise HTTPException(status_code=401, detail="Invalid authentication")
+        except:
+            LOGGER.error("Authentication header not found")
+            raise HTTPException(status_code=401, detail="Invalid authentication")
+
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
+    getAuth(request)
     LOGGER.debug("Processing...")
     start_time = time.time()
     response = await call_next(request)
@@ -138,8 +154,8 @@ async def getData(request: Request, call_next):
 
 
 @app.get("/")
-# @limiter.limit(rate_limit)
-# @cache(namespace="api", expire=cache_time)
+@limiter.limit(rate_limit)
+@cache(namespace="api", expire=cache_time)
 async def root(request: Request, response: Response):
     return {"stats" : getDecoded(SlmodStatsFiles.slmodStats_File, response)}
 
