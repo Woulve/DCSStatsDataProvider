@@ -1,4 +1,4 @@
-from src.components.luaparser.processor.updateLuaDecoded import recursive_dict_merge
+from src.components.luaparser.slmodstats.processor.updateLuaDecoded import recursive_dict_merge
 
 
 def add_totals(obj):
@@ -23,24 +23,24 @@ def addTotalKills(luadecoded):
                         if type_unitkilled == "Ground Units":
                             try:
                                 totalPoints += luadecoded[type][ucid]["times"][aircrafttimes]["kills"]["Ground Units"]["total"] * 2
-                            except:
+                            except Exception as e:
                                 continue
                         if type_unitkilled == "Planes":
                             try:
                                 totalPoints += luadecoded[type][ucid]["times"][aircrafttimes]["kills"]["Planes"]["total"] * 3
-                            except:
+                            except Exception as e:
                                 continue
                         if type_unitkilled == "Ships":
                             try:
                                 totalPoints += luadecoded[type][ucid]["times"][aircrafttimes]["kills"]["Ships"]["total"] * 5
-                            except:
+                            except Exception as e:
                                 continue
                         if type_unitkilled == "Helicopters":
                             try:
                                 totalPoints += luadecoded[type][ucid]["times"][aircrafttimes]["kills"]["Helicopters"]["total"] * 1
-                            except:
+                            except Exception as e:
                                 continue
-                except:
+                except Exception as e:
                     continue
             luadecoded[type][ucid]["totalPoints"] = totalPoints
 

@@ -8,8 +8,8 @@ def getPlayerRankingByFlightTime(luadecoded):
     for type in luadecoded:
         for ucid in luadecoded[type]:
             try:
-                playerRanking[list(luadecoded["stats"][ucid]["names"].values())[-1]] = luadecoded["stats"][ucid]["times"]["totalFlightTime"]
-            except:
+                playerRanking[list(luadecoded[ucid]["names"].values())[-1]] = luadecoded[ucid]["times"]["totalFlightTime"]
+            except Exception as e:
                 LOGGER.info("Error getting player ranking by flight time")
                 raise HTTPException(status_code=500)
 

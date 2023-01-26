@@ -36,7 +36,7 @@ def check_if_weather_update_is_needed():
             else:
                 LOGGER.info("Weather update not needed, less than 24 hours since last update.")
                 return False
-    except:
+    except Exception as e:
         LOGGER.info("Weather update needed, no weather_last_time_updated.txt file found.")
         return True
 
@@ -68,7 +68,7 @@ def update_miz_weather():
         try:
             with open("config.json", "w+") as outfile:
                 outfile.write(json_object)
-        except:
+        except Exception as e:
             LOGGER.error("Error: An error occurred while writing to config.json.")
             return
 
@@ -83,6 +83,6 @@ def update_miz_weather():
         else:
             LOGGER.error("Error: realweather output didn't contain \"Removed mission_unpacked\". DCS-real-weather output: " + result.stderr)
             return False
-    except:
+    except Exception as e:
         # handle other possible errors
         LOGGER.error("Error: An error occurred while updating weather.")

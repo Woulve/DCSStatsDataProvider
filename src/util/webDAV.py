@@ -48,5 +48,5 @@ def checkExists(file):
     client.verify = False
     try:
         return client.check(file)
-    except:
+    except Exception as e:
         LOGGER.error("Couldn't check if file exists: "+file)

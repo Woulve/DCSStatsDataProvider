@@ -18,7 +18,7 @@ import base64
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 from src.util.serverlogger import serverLogger
 from src.util.getConfigValue import getConfigValue, getAllConfigValues
-from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
+from src.components.luaparser.slmodstats.slmodStatsParser import getLuaDecoded_slmodStats
 from src.components.data.SlmodStats.playerData import getPlayersList
 from src.components.data.SlmodStats.playerStats import getPlayerStats
 from src.components.data.SlmodStats.playerData import getPlayerDataByUCID
@@ -50,10 +50,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class SlmodStatsFiles(): #remote lcoation of the slmodstats file
-    slmodStats_File = "Slmod/SlmodStats.lua"
-
 class LastFetchSuccessful():
     lastFetchSuccessful = False
     def setLastFetchSuccessful(self, value: bool):
@@ -63,9 +59,11 @@ class LastFetchSuccessful():
 
 lastFetchSuccessful = LastFetchSuccessful();
 
-def getDecoded(file, response):
+luafiles = {
+    "SlmodStats": getConfigValue("localfiles", "slmodstatsluapath")
+}
 
-    slmodStats_File = SlmodStatsFiles.slmodStats_File
+def getDecoded(file, response):
 
     if getConfigValue("configuration", "enablerealtimeupdates") == "True":
         response.headers["Realtimeupdates"] = "True"
@@ -74,10 +72,10 @@ def getDecoded(file, response):
         enablerealtimeupdates = False
         response.headers["Realtimeupdates"] = "False"
 
-    if file == SlmodStatsFiles.slmodStats_File:
+    if file == luafiles["SlmodStats"]:
         luadecoded = getLuaDecoded_slmodStats(enablerealtimeupdates)
         if luadecoded == None:
-            LOGGER.error("Couldn't read "+slmodStats_File)
+            LOGGER.error("Couldn't decode SlmodStats.lua")
             raise HTTPException(status_code=500)
         else:
             return luadecoded["stats"]
@@ -121,7 +119,7 @@ def repeated():
         updateWeather() #checks if weather update is needed and updates it if it is.
 
     if getConfigValue("webdav", "enablewebdav") == "True":
-        if getFileFromWebDAV(SlmodStatsFiles.slmodStats_File, "./SlmodStats.lua") == 0:
+        if getFileFromWebDAV("Slmod/SlmodStats.lua", "./SlmodStats.lua") == 0:
             lastFetchSuccessful.setLastFetchSuccessful(False)
             raise HTTPException(status_code=500)
         else:
@@ -135,7 +133,7 @@ def getAuth(request: Request):
             dec = base64.b64decode(auth_header)
             if dec != datet.encode():
                 raise HTTPException(status_code=401, detail="Invalid authentication")
-        except:
+        except Exception as e:
             LOGGER.error("Authentication header not found")
             raise HTTPException(status_code=401, detail="Invalid authentication")
 
@@ -157,43 +155,50 @@ async def getData(request: Request, call_next):
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def root(request: Request, response: Response):
-    return {"stats" : getDecoded(SlmodStatsFiles.slmodStats_File, response)}
+    return {"stats" : getDecoded(luafiles["SlmodStats"], response)}
+
+@app.get("/test")
+async def test(request: Request, response: Response):
+    def hehe():
+        raise HTTPException(status_code=401, detail="Invalid authentication")
+    hehe()
+    return {"test" : "test"}
 
 @app.get("/players")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayersList(request: Request, response: Response):
-    return {"players" : getPlayersList(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
+    return {"players" : getPlayersList(getDecoded(luafiles["SlmodStats"], response))}
 
 @app.get("/player/{name}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayersList(name, request: Request, response: Response):
-    return {"player" : getPlayerStats(name, getDecoded(SlmodStatsFiles.slmodStats_File, response))}
+    return {"player" : getPlayerStats(name, getDecoded(luafiles["SlmodStats"], response))}
 
 @app.get("/playerbyucid/{UCID}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayerDataByUCID(UCID,request: Request, response: Response):
-    return { UCID : getPlayerDataByUCID(getDecoded(SlmodStatsFiles.slmodStats_File, response), UCID)}
+    return { UCID : getPlayerDataByUCID(getDecoded(luafiles["SlmodStats"], response), UCID)}
 
 @app.get("/playerbyname/{name}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayerDataByName(name, request: Request, response: Response):
-    return {"UCID" : getPlayerUCIDByName(name, getDecoded(SlmodStatsFiles.slmodStats_File, response))}
+    return {"UCID" : getPlayerUCIDByName(name, getDecoded(luafiles["SlmodStats"], response))}
 
 @app.get("/playerrankingbyflighttime")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayerRankingByFlightTime(request: Request, response: Response):
-    return {"ranking" : getPlayerRankingByFlightTime(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
+    return {"ranking" : getPlayerRankingByFlightTime(getDecoded(luafiles["SlmodStats"], response))}
 
 @app.get("/playerrankingbypoints")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def PlayerRankingByFlightTime(request: Request, response: Response):
-    return {"ranking" : getPlayerRankingByPoints(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
+    return {"ranking" : getPlayerRankingByPoints(getDecoded(luafiles["SlmodStats"], response))}
 
 @app.get("/lastfetchsuccessful")
 @limiter.limit(rate_limit)
@@ -205,7 +210,7 @@ async def LastFetch(request: Request, response: Response):
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
 async def AllPlayerStats(request: Request, response: Response):
-    return { "allPlayerStats" : getAllPlayerStats(getDecoded(SlmodStatsFiles.slmodStats_File, response)) }
+    return { "allPlayerStats" : getAllPlayerStats(getDecoded(luafiles["SlmodStats"], response)) }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,4 +1,4 @@
-from src.components.luaparser.processor.updateLuaDecoded import recursive_dict_merge
+from src.components.luaparser.slmodstats.processor.updateLuaDecoded import recursive_dict_merge
 
 
 def addTotalTime(luadecoded):

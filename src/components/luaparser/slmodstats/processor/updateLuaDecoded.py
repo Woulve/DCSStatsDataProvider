@@ -58,7 +58,7 @@ def updateLuaDecoded(luadecoded_serialized, luadecoded_additions):
         if addition != "":
             try:
                 luadecoded_serialized = recursive_dict_merge(luadecoded_serialized, convert_lua_notation_to_python(addition))
-            except:
+            except Exception as e:
                 return luadecoded_serialized
 
     return luadecoded_serialized

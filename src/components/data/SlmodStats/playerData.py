@@ -1,20 +1,26 @@
 from fastapi import FastAPI, Request, HTTPException, Response
+from src.util.serverlogger import serverLogger
+
+LOGGER = serverLogger()
 
 def getPlayersList(luadecoded):
     playersList = []
-    for ucid in luadecoded["stats"]:
+    for ucid in luadecoded:
         playerdata = {}
-        playerdata["name"] = list(luadecoded["stats"][ucid]["names"].values())[-1]
+        playerdata["name"] = list(luadecoded[ucid]["names"].values())[-1]
         playerdata["ucid"] = ucid
         playersList.append(playerdata)
     return playersList
 
 def getPlayerDataByUCID(luadecoded, UCID):
-    return luadecoded["stats"][UCID]
+    return luadecoded[UCID]
 
 def getPlayerUCIDByName(playerName: str, luadecoded):
-    for item in luadecoded:
-        for ucid in luadecoded[item]:
-            if(playerName.lower() in list(luadecoded[item][ucid]["names"].values())[-1].lower()):
+    for ucid in luadecoded:
+        try:
+            if(playerName.lower() in list(luadecoded[ucid]["names"].values())[-1].lower()):
                 return(ucid)
-        raise HTTPException(status_code=404, detail="Player not found")
+        except Exception as e:
+            LOGGER.exception(e)
+            raise HTTPException(status_code=500)
+    raise HTTPException(status_code=404, detail="Player not found")

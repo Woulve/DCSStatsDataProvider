@@ -9,7 +9,7 @@ def getAllPlayerStats(luadecoded):
 
     player_stats = {}
 
-    for ucid, player_data in luadecoded.get("stats", {}).items():
+    for ucid, player_data in luadecoded.items():
         a2akillstotal = 0
         a2gkillstotal = 0
         deathstotal = 0

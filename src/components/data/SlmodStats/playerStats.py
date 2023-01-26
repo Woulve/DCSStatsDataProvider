@@ -13,7 +13,7 @@ def getPlayerStats(name, luadecoded):
 
     player_stats = {}
 
-    player_data = luadecoded.get("stats", {}).get(ucid, [])
+    player_data = luadecoded.get(ucid, [])
     a2akillstotal = 0
     a2gkillstotal = 0
     deathstotal = 0
