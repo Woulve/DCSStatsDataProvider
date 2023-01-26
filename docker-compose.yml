@@ -1,19 +1,20 @@
 version: "3.3"
 services:
-  traefik:
-      image: "traefik:v2.9"
-      command: --api.insecure=true --providers.docker
-      ports:
-        - "80:80"
-        - "8080:8080"
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
+  # traefik:
+  #     image: "traefik:v2.9"
+  #     command: --api.insecure=true --providers.docker
+  #     ports:
+  #       - "80:80"
+  #       - "8080:8080"
+  #     volumes:
+  #       - /var/run/docker.sock:/var/run/docker.sock
   dcsstats:
     image: woulve/dcsstatsbackend:latest
     volumes:
       - ./serverlog.log:/DCSStats/serverlog.log
       - ./config.cfg:/DCSStats/config.cfg
       - ./src/util/realweather/:/DCSStats/src/util/realweather/
+      - ./SlmodStats.lua:/DCSStats/SlmodStats.lua
     ports:
       - "8000:8000"
     environment:

@@ -74,14 +74,13 @@ def getDecoded(file, response):
         enablerealtimeupdates = False
         response.headers["Realtimeupdates"] = "False"
 
-    match file:
-        case slmodStats_File:
-            luadecoded = getLuaDecoded_slmodStats(enablerealtimeupdates)
-            if luadecoded == None:
-                LOGGER.error("Couldn't read "+slmodStats_File)
-                raise HTTPException(status_code=500)
-            else:
-                return luadecoded["stats"]
+    if file == SlmodStatsFiles.slmodStats_File:
+        luadecoded = getLuaDecoded_slmodStats(enablerealtimeupdates)
+        if luadecoded == None:
+            LOGGER.error("Couldn't read "+slmodStats_File)
+            raise HTTPException(status_code=500)
+        else:
+            return luadecoded["stats"]
 
 def updateWeather():
     #when enablewebdav and webdavmission is true, we fetch the mission.miz from the webdav server and update the weather in it.
@@ -143,7 +142,8 @@ def getAuth(request: Request):
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
-    getAuth(request)
+    if getConfigValue("authentication", "enablesimpleauth") == "True":
+        getAuth(request)
     LOGGER.debug("Processing...")
     start_time = time.time()
     response = await call_next(request)
@@ -162,50 +162,50 @@ async def root(request: Request, response: Response):
 @app.get("/players")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayersList(request: Request):
-    return {"players" : getPlayersList(luadecoded)}
+async def PlayersList(request: Request, response: Response):
+    return {"players" : getPlayersList(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
 
 @app.get("/player/{name}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayersList(name, request: Request):
-    return {"player" : getPlayerStats(name, luadecoded)}
+async def PlayersList(name, request: Request, response: Response):
+    return {"player" : getPlayerStats(name, getDecoded(SlmodStatsFiles.slmodStats_File, response))}
 
 @app.get("/playerbyucid/{UCID}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayerDataByUCID(UCID,request: Request):
-    return { UCID : getPlayerDataByUCID(luadecoded, UCID)}
+async def PlayerDataByUCID(UCID,request: Request, response: Response):
+    return { UCID : getPlayerDataByUCID(getDecoded(SlmodStatsFiles.slmodStats_File, response), UCID)}
 
 @app.get("/playerbyname/{name}")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayerDataByName(name, request: Request):
-    return {"UCID" : getPlayerUCIDByName(name, luadecoded)}
+async def PlayerDataByName(name, request: Request, response: Response):
+    return {"UCID" : getPlayerUCIDByName(name, getDecoded(SlmodStatsFiles.slmodStats_File, response))}
 
 @app.get("/playerrankingbyflighttime")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayerRankingByFlightTime(request: Request):
-    return {"ranking" : getPlayerRankingByFlightTime(luadecoded)}
+async def PlayerRankingByFlightTime(request: Request, response: Response):
+    return {"ranking" : getPlayerRankingByFlightTime(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
 
 @app.get("/playerrankingbypoints")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def PlayerRankingByFlightTime(request: Request):
-    return {"ranking" : getPlayerRankingByPoints(luadecoded)}
+async def PlayerRankingByFlightTime(request: Request, response: Response):
+    return {"ranking" : getPlayerRankingByPoints(getDecoded(SlmodStatsFiles.slmodStats_File, response))}
 
 @app.get("/lastfetchsuccessful")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def LastFetch(request: Request):
+async def LastFetch(request: Request, response: Response):
     return { "lastFetchSuccessful" : lastFetchSuccessful.getLastFetchSuccessful() }
 
 @app.get("/allplayerstats")
 @limiter.limit(rate_limit)
 @cache(namespace="api", expire=cache_time)
-async def AllPlayerStats(request: Request):
-    return { "allPlayerStats" : getAllPlayerStats(luadecoded) }
+async def AllPlayerStats(request: Request, response: Response):
+    return { "allPlayerStats" : getAllPlayerStats(getDecoded(SlmodStatsFiles.slmodStats_File, response)) }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
