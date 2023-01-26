@@ -101,7 +101,7 @@ def updateWeather():
 
 luadecoded = getLuaDecoded_slmodStats(False)
 
-cache_time = 60 * 5 #5 minutes
+cache_time = 60 * 5 #5 minute
 rate_limit = "60/minute"
 
 @app.on_event("startup")
