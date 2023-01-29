@@ -1,4 +1,6 @@
 SlmodStats.lua
+letsencrypt
+traefik
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
