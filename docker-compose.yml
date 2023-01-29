@@ -19,7 +19,7 @@ services:
       - "--entrypoints.websecure.address=:443"
       # Enable ACME (Let's Encrypt): automatic SSL.
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.letsencrypt.acme.email=$EMAIL"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       # Global redirect to https
@@ -57,10 +57,10 @@ services:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dcsstats.rule= Host(`shithonse.strangled.net`)"
+      - "traefik.http.routers.dcsstats.rule= Host(`$MY_DOMAIN`)"
       - "traefik.http.routers.dcsstats.entrypoints=websecure"
       - "traefik.http.routers.dcsstats.tls=true"
-      - traefik.http.routers.dcsstats.tls.certresolver=letsencrypt
+      - "traefik.http.routers.dcsstats.tls.certresolver=letsencrypt"
     networks:
       - traefik_net
     restart: unless-stopped
