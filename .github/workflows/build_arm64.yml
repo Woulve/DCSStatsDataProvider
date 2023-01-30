@@ -23,6 +23,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: woulve/dcsstatsbackend:arm64
+          tags: ${{ secrets.IMAGE_NAME }}:arm64
           platforms: linux/arm64
 

@@ -1,4 +1,4 @@
-from src.components.luaparser.processor.updateLuaDecoded import convert_lua_notation_to_python
+from src.components.luaparser.slmodstats.processor.updateLuaDecoded import convert_lua_notation_to_python
 
 testLua = 'stats["ef202237873822643b1f533fc865a353"]["times"]["F-14B"]["total"] = "hehe"'
 

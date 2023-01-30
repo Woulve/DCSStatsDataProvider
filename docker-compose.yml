@@ -17,6 +17,10 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addrouterslabels=true"
+      - "--metrics.prometheus.addserviceslabels=true"
       # Enable ACME (Let's Encrypt): automatic SSL.
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
@@ -26,7 +30,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.traefik.address=:8080"
-      - "--providers.docker.network=$DEFAULT_NETWORK"
+      - "--providers.docker.network=traefik_net"
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.api.entryPoints=traefik"
@@ -34,6 +38,10 @@ services:
     - "traefik.http.routers.api.service=api@internal"
     - "traefik.http.routers.api.middlewares=api-auth"
     - "traefik.http.middlewares.api-auth.basicauth.users=$DASHBOARD_LOGIN"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     volumes:
       - ./letsencrypt/acme.json:/etc/traefik/acme/acme.json
@@ -43,16 +51,15 @@ services:
       - traefik_net
     restart: unless-stopped
 
-
-  dcsstats:
-    image: woulve/dcsstatsbackend:$PLATFORM
+  dcsstatsdataprovider:
+    image: ${IMAGE_NAME}:$PLATFORM
     ports:
       - 8000:8000
     volumes:
-      - ./serverlog.log:/DCSStats/serverlog.log
-      - ./config.cfg:/DCSStats/config.cfg
-      - ./src/util/realweather/:/DCSStats/src/util/realweather/
-      - ./SlmodStats.lua:/DCSStats/SlmodStats.lua
+      - ./DCSStatsDataProvider/serverlog.log:/DCSStatsDataProvider/serverlog.log
+      - ./DCSStatsDataProvider/config.cfg:/DCSStatsDataProvider/config.cfg
+      - ./DCSStatsDataProvider/src/util/realweather/:/DCSStatsDataProvider/src/util/realweather/
+      - ./DCSStatsDataProvider/SlmodStats.lua:/DCSStatsDataProvider/SlmodStats.lua
     environment:
       - TZ=Europe/Berlin
     labels:
@@ -64,8 +71,26 @@ services:
     networks:
       - traefik_net
     restart: unless-stopped
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    user: ":"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    networks:
+      - traefik_net
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - traefik_net
 
 networks:
   traefik_net:
-      name: $DEFAULT_NETWORK
+      name: traefik_net
       external: true

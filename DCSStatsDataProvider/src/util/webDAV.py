@@ -7,7 +7,7 @@ import urllib3
 
 LOGGER = serverLogger()
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #Disable SSL warnings
 
 load_dotenv()
 

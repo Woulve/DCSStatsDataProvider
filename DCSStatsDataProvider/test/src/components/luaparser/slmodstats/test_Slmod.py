@@ -1,4 +1,4 @@
-from src.components.luaparser.slmodStatsParser import getLuaDecoded_slmodStats
+from src.components.luaparser.slmodstats.slmodStatsParser import getLuaDecoded_slmodStats
 from src.util.serverlogger import serverLogger
 import json
 
