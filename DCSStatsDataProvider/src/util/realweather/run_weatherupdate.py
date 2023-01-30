@@ -17,8 +17,8 @@ LOGGER = serverLogger()
 
 def over_24_hours(date1, date2):
     try:
-        date1 = datetime.strptime(date1, "%d/%m/%Y %H:%M:%S")
-        date2 = datetime.strptime(date2, "%d/%m/%Y %H:%M:%S")
+        date1 = datetime.strptime(date1, "%Y/%m/%d %H:%M:%S")
+        date2 = datetime.strptime(date2, "%Y/%m/%d %H:%M:%S")
         difference = date2 - date1
         return difference > timedelta(hours=24)
     except ValueError:
@@ -30,7 +30,7 @@ def check_if_weather_update_is_needed():
     try:
         with open("weather_last_time_updated.txt", "r") as datefile:
             last_time_updated = datefile.read()
-            if over_24_hours(last_time_updated, datetime.now().strftime("%d/%m/%Y %H:%M:%S")):
+            if over_24_hours(last_time_updated, datetime.now().strftime("%Y/%m/%d %H:%M:%S")):
                 LOGGER.info("Weather update needed, over 24 hours since last update.")
                 return True
             else:
@@ -77,7 +77,7 @@ def update_miz_weather():
 
         if "Removed mission_unpacked" in result.stdout:
             with open("weather_last_time_updated.txt", "w+") as datefile:
-                datefile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                datefile.write(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                 LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the DCS-real-weather output)")
             return True
         else:

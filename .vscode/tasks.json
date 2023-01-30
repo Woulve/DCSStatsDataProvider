@@ -13,6 +13,24 @@
             "type": "shell",
             "command": "ping raspberrypi.local",
             "problemMatcher": []
+        },
+        {
+            "label": "Force new docker image build",
+            "type": "shell",
+            "command": "docker build --no-cache -t ${IMAGE_NAME}:${input:platform} .",
+            "problemMatcher": []
         }
-    ]
+    ],
+    "inputs": [
+        {
+          "id": "platform",
+          "type": "pickString",
+          "description": "Build for arm64 or amd64?",
+          "options": [
+            "arm64",
+            "amd64",
+          ],
+          "default": "amd64"
+        }
+      ]
 }

@@ -30,7 +30,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.traefik.address=:8080"
-      - "--providers.docker.network=$DEFAULT_NETWORK"
+      - "--providers.docker.network=traefik_net"
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.api.entryPoints=traefik"
@@ -51,8 +51,8 @@ services:
       - traefik_net
     restart: unless-stopped
 
-  dcsstats:
-    image: woulve/dcsstatsbackend:$PLATFORM
+  dcsstatsdataprovider:
+    image: ${IMAGE_NAME}:$PLATFORM
     ports:
       - 8000:8000
     volumes:
