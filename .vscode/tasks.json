@@ -4,12 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "🔄 Update requirements.txt",
+            "label": "Update requirements.txt",
             "type": "shell",
             "command": "pipreqs --force"
         },
         {
-            "label": "🌐 Get raspberry IP",
+            "label": "Get raspberry IP",
             "type": "shell",
             "command": "ping raspberrypi.local",
             "problemMatcher": []
@@ -18,6 +18,12 @@
             "label": "Force new docker image build",
             "type": "shell",
             "command": "docker build --no-cache -t ${IMAGE_NAME}:${input:platform} .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker down with volume and orphan remove",
+            "type": "shell",
+            "command": "docker-compose down --v --remove-orphans",
             "problemMatcher": []
         },
         {
