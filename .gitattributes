@@ -1,6 +1,6 @@
 *.log filter=git-crypt diff=git-crypt
 *.env filter=git-crypt diff=git-crypt
-realweather/** filter=git-crypt diff=git-crypt
+**/realweather/** filter=git-crypt diff=git-crypt
 grafana/** filter=git-crypt diff=git-crypt
 letsencrypt/** filter=git-crypt diff=git-crypt
 traefik/** filter=git-crypt diff=git-crypt

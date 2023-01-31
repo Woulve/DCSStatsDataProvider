@@ -1,4 +1,46 @@
-{
+{"__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.3.1"
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
     "annotations": {
       "list": [
         {
@@ -31,7 +73,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -90,7 +132,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "editorMode": "code",
             "expr": "time() - process_start_time_seconds{job=\"prometheus\", instance=\"traefik:8080\"}",
@@ -112,7 +154,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fontSize": "80%",
         "format": "short",
@@ -138,7 +180,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "expr": "topk(5, sum(traefik_service_requests_total{protocol=~\"$protocol\"}) by (code))",
             "format": "time_series",
@@ -154,7 +196,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -222,7 +264,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "editorMode": "code",
             "expr": "sum(increase(traefik_entrypoint_requests_total{code=\"500\",protocol=~\"$protocol\"}[$interval]))",
@@ -236,7 +278,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -318,7 +360,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "editorMode": "code",
             "expr": "sum(increase(traefik_entrypoint_requests_total{code=\"500\",protocol=~\"$protocol\"}[$interval]))",
@@ -333,7 +375,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -412,7 +454,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "editorMode": "code",
             "expr": "traefik_entrypoint_requests_total{code!=\"200\"}",
@@ -429,7 +471,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -476,7 +518,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "expr": "sum(traefik_entrypoint_requests_total) by (protocol)",
             "format": "time_series",
@@ -498,7 +540,7 @@
         "dashes": false,
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -548,7 +590,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "editorMode": "code",
             "expr": "sum(rate(traefik_entrypoint_requests_total[$interval]))",
@@ -595,7 +637,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -659,7 +701,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "expr": "sum(traefik_entrypoint_request_duration_seconds_sum) / sum(traefik_entrypoint_requests_total) * 1000",
             "format": "time_series",
@@ -677,7 +719,7 @@
         "dashes": false,
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "fieldConfig": {
           "defaults": {
@@ -724,7 +766,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "expr": "sum(traefik_service_request_duration_seconds_sum{protocol=~\"$protocol\"}) / sum(traefik_entrypoint_requests_total{protocol=~\"$protocol\"}) * 1000",
             "format": "time_series",
@@ -772,7 +814,7 @@
         "dashes": false,
         "datasource": {
           "type": "prometheus",
-          "uid": "3IJUwG0Vk"
+          "uid": "${DS_PROMETHEUS}"
         },
         "decimals": 0,
         "fieldConfig": {
@@ -827,7 +869,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "3IJUwG0Vk"
+              "uid": "${DS_PROMETHEUS}"
             },
             "expr": "sum(increase(traefik_service_requests_total{protocol=~\"$protocol\"}[$interval])) by (code)",
             "format": "time_series",
@@ -885,7 +927,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "3IJUwG0Vk"
+            "uid": "${DS_PROMETHEUS}"
           },
           "definition": "label_values(job)",
           "hide": 0,
@@ -916,7 +958,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "3IJUwG0Vk"
+            "uid": "${DS_PROMETHEUS}"
           },
           "definition": "label_values(traefik_service_requests_total, protocol)",
           "hide": 0,
@@ -1019,7 +1061,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "3IJUwG0Vk"
+            "uid": "${DS_PROMETHEUS}"
           },
           "definition": "label_values(service)",
           "hide": 0,
@@ -1049,7 +1091,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "3IJUwG0Vk"
+            "uid": "${DS_PROMETHEUS}"
           },
           "definition": "label_values(entrypoint)",
           "hide": 0,
