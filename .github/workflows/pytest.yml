@@ -22,6 +22,6 @@ jobs:
           pip install -r DCSStatsDataProvider/requirements.txt
       - name: Test with pytest
         run: |
-          pip install pytest
+          pip install pytest uvicorn
           cd DCSStatsDataProvider
           pytest --rootdir=.
