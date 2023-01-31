@@ -19,6 +19,18 @@
             "type": "shell",
             "command": "docker build --no-cache -t ${IMAGE_NAME}:${input:platform} .",
             "problemMatcher": []
+        },
+        {
+            "label": "Enable pre-commit hook",
+            "type": "shell",
+            "command": "pre-commit install",
+            "problemMatcher": []
+        },
+        {
+            "label": "Disable pre-commit hook",
+            "type": "shell",
+            "command": "pre-commit uninstall",
+            "problemMatcher": []
         }
     ],
     "inputs": [
