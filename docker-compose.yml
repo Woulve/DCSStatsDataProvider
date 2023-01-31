@@ -39,7 +39,7 @@ services:
     - "traefik.http.routers.api.middlewares=api-auth"
     - "traefik.http.middlewares.api-auth.basicauth.users=$DASHBOARD_LOGIN"
     logging:
-      options:
+      options: #
         max-size: "10m"
         max-file: "3"
 
