@@ -50,3 +50,4 @@ def checkExists(file):
         return client.check(file)
     except Exception as e:
         LOGGER.error("Couldn't check if file exists: "+file)
+        LOGGER.exception(e)

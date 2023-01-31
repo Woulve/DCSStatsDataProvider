@@ -12,8 +12,6 @@ def getPlayersList(luadecoded):
         playersList.append(playerdata)
     return playersList
 
-def getPlayerDataByUCID(luadecoded, UCID):
-    return luadecoded[UCID]
 
 def getPlayerUCIDByName(playerName: str, luadecoded):
     for ucid in luadecoded:
@@ -21,6 +19,7 @@ def getPlayerUCIDByName(playerName: str, luadecoded):
             if(playerName.lower() in list(luadecoded[ucid]["names"].values())[-1].lower()):
                 return(ucid)
         except Exception as e:
+            LOGGER.error("Error getting player UCID by name")
             LOGGER.exception(e)
             raise HTTPException(status_code=500)
     raise HTTPException(status_code=404, detail="Player not found")

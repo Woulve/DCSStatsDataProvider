@@ -70,6 +70,7 @@ def update_miz_weather():
                 outfile.write(json_object)
         except Exception as e:
             LOGGER.error("Error: An error occurred while writing to config.json.")
+            LOGGER.exception(e)
             return
 
         command = [weatherpath+"/DCS-real-weather"]
@@ -86,3 +87,4 @@ def update_miz_weather():
     except Exception as e:
         # handle other possible errors
         LOGGER.error("Error: An error occurred while updating weather.")
+        LOGGER.exception(e)

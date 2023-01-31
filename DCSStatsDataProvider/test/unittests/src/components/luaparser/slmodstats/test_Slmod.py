@@ -14,4 +14,4 @@ class TestSLModStatsParser:
             return False
         return True
     def test_returns_valid_json(self):
-        assert self.returns_valid_json(json.dumps(getLuaDecoded_slmodStats(False))) == True, "Returns valid JSON"
+        assert self.returns_valid_json(json.dumps(getLuaDecoded_slmodStats("./SlmodStats.lua", False))) == True, "Returns valid JSON"

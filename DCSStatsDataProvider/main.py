@@ -6,8 +6,6 @@ from fastapi import FastAPI, Request, HTTPException, Response, Header
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
-from fastapi_cache.decorator import cache
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -21,13 +19,11 @@ from src.util.getConfigValue import getConfigValue, getAllConfigValues
 from src.components.luaparser.slmodstats.slmodStatsParser import getLuaDecoded_slmodStats
 from src.components.data.SlmodStats.playerData import getPlayersList
 from src.components.data.SlmodStats.playerStats import getPlayerStats
-from src.components.data.SlmodStats.playerData import getPlayerDataByUCID
 from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
 from src.components.data.SlmodStats.allPlayerStats import getAllPlayerStats
 from src.util.realweather.run_weatherupdate import update_miz_weather
 from src.components.data.SlmodStats.Rankings.playerRankingByFlightTime import getPlayerRankingByFlightTime;
 from src.components.data.SlmodStats.Rankings.playerRankingByPoints import getPlayerRankingByPoints;
-from src.util.realweather.run_weatherupdate import check_if_weather_update_is_needed
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -60,25 +56,36 @@ class LastFetchSuccessful():
 lastFetchSuccessful = LastFetchSuccessful();
 
 luafiles = {
-    "SlmodStats": getConfigValue("localfiles", "slmodstatsluapath")
+    "SlmodStats": getConfigValue("localfiles", "slmodstatsluapath"),
+    "SlmodStatsDebugging": getConfigValue("localfiles", "slmodstatsdebuggingluapath")
 }
 
 def getDecoded(file, response):
 
     if getConfigValue("configuration", "enablerealtimeupdates") == "True":
         response.headers["Realtimeupdates"] = "True"
-        enablerealtimeupdates = False
+        enablerealtimeupdates = True
     else:
         enablerealtimeupdates = False
         response.headers["Realtimeupdates"] = "False"
 
     if file == luafiles["SlmodStats"]:
-        luadecoded = getLuaDecoded_slmodStats(enablerealtimeupdates)
+        file_path = getConfigValue("localfiles", "slmodstatsluapath")
+        luadecoded = getLuaDecoded_slmodStats(file_path, enablerealtimeupdates)
         if luadecoded == None:
             LOGGER.error("Couldn't decode SlmodStats.lua")
             raise HTTPException(status_code=500)
         else:
-            return luadecoded["stats"]
+            return luadecoded
+    elif file == luafiles["SlmodStatsDebugging"]:
+        LOGGER.debug("decoding SlmodStatsDebugging.lua")
+        file_path = getConfigValue("localfiles", "slmodstatsdebuggingluapath")
+        luadecoded = getLuaDecoded_slmodStats(file_path, enablerealtimeupdates)
+        if luadecoded == None:
+            LOGGER.error("Couldn't decode SlmodStatsDebugging.lua")
+            raise HTTPException(status_code=500)
+        else:
+            return luadecoded
 
 def updateWeather():
     #when enablewebdav and webdavmission is true, we fetch the mission.miz from the webdav server and update the weather in it.
@@ -99,14 +106,13 @@ def updateWeather():
 
 
 
-luadecoded = getLuaDecoded_slmodStats(False)
+# luadecoded = getLuaDecoded_slmodStats(luafiles["SlmodStats"], False)
 
 cache_time = 60 * 5 #5 minutes
 rate_limit = "60/minute"
 
 @app.on_event("startup")
 def startup():
-    FastAPICache.init(InMemoryBackend())
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     ENDC = '\033[0m'
@@ -137,6 +143,11 @@ def getAuth(request: Request):
             LOGGER.error("Authentication header not found")
             raise HTTPException(status_code=401, detail="Invalid authentication")
 
+def getLuaVersion(request, response, file: str):
+    if request.headers.get("debug") == "true":
+        file = "SlmodStatsDebugging"
+        return getDecoded(luafiles[file], response)
+    return getDecoded(luafiles[file], response)
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
@@ -153,64 +164,44 @@ async def getData(request: Request, call_next):
 
 @app.get("/")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def root(request: Request, response: Response):
-    return {"stats" : getDecoded(luafiles["SlmodStats"], response)}
 
-@app.get("/test")
-async def test(request: Request, response: Response):
-    def hehe():
-        raise HTTPException(status_code=401, detail="Invalid authentication")
-    hehe()
-    return {"test" : "test"}
+    return {"stats" : getLuaVersion(request, response, "SlmodStats")}
 
 @app.get("/players")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def PlayersList(request: Request, response: Response):
-    return {"players" : getPlayersList(getDecoded(luafiles["SlmodStats"], response))}
+    return {"players" : getPlayersList(getLuaVersion(request, response, "SlmodStats"))}
 
 @app.get("/player/{name}")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def PlayersList(name, request: Request, response: Response):
-    return {"player" : getPlayerStats(name, getDecoded(luafiles["SlmodStats"], response))}
-
-@app.get("/playerbyucid/{UCID}")
-@limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
-async def PlayerDataByUCID(UCID,request: Request, response: Response):
-    return { UCID : getPlayerDataByUCID(getDecoded(luafiles["SlmodStats"], response), UCID)}
+    return {"player" : getPlayerStats(name, getLuaVersion(request, response, "SlmodStats"))}
 
 @app.get("/playerbyname/{name}")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def PlayerDataByName(name, request: Request, response: Response):
-    return {"UCID" : getPlayerUCIDByName(name, getDecoded(luafiles["SlmodStats"], response))}
+    return {"UCID" : getPlayerUCIDByName(name, getLuaVersion(request, response, "SlmodStats"))}
 
 @app.get("/playerrankingbyflighttime")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def PlayerRankingByFlightTime(request: Request, response: Response):
-    return {"ranking" : getPlayerRankingByFlightTime(getDecoded(luafiles["SlmodStats"], response))}
+    return {"flighttimeranking" : getPlayerRankingByFlightTime(getLuaVersion(request, response, "SlmodStats"))}
 
 @app.get("/playerrankingbypoints")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def PlayerRankingByFlightTime(request: Request, response: Response):
-    return {"ranking" : getPlayerRankingByPoints(getDecoded(luafiles["SlmodStats"], response))}
+    return {"pointranking" : getPlayerRankingByPoints(getLuaVersion(request, response, "SlmodStats"))}
 
 @app.get("/lastfetchsuccessful")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def LastFetch(request: Request, response: Response):
     return { "lastFetchSuccessful" : lastFetchSuccessful.getLastFetchSuccessful() }
 
 @app.get("/allplayerstats")
 @limiter.limit(rate_limit)
-@cache(namespace="api", expire=cache_time)
 async def AllPlayerStats(request: Request, response: Response):
-    return { "allPlayerStats" : getAllPlayerStats(getDecoded(luafiles["SlmodStats"], response)) }
+    return { "allplayerstats" : getAllPlayerStats(getLuaVersion(request, response, "SlmodStats")) }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
