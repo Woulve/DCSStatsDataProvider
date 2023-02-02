@@ -1,8 +1,8 @@
-# SlmodStats.lua
-# letsencrypt
-# traefik
-# grafana
-temp
+*.lua
+letsencrypt
+traefik
+grafana
+git-crypt-key
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

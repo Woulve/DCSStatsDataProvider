@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
 
   dcsstatsdataprovider:
-    image: ${IMAGE_NAME}:$PLATFORM
+    image: $IMAGE_NAME:$PLATFORM
     ports:
       - 8000:8000
     volumes:

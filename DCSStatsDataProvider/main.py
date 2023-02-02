@@ -35,6 +35,8 @@ LOGGER = serverLogger()
 
 origins = [
     "http://localhost:3000",
+    "http://localhost:3001",
+    "https://dcsstats-899a0.web.app"
 ]
 
 

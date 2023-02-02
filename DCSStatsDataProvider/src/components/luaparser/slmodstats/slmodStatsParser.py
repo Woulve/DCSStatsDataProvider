@@ -23,7 +23,7 @@ def getLuaDecoded_slmodStats(filepath, update):
     if update == True:
             updatedLua = updateLuaDecoded(luadecoded_serialized, luadecoded_additions)
             if updatedLua != '':
-                LOGGER.info("Successfully updated serialized lua")
+                LOGGER.debug("Successfully updated serialized lua")
                 return process(updatedLua["stats"])
             else:
                 LOGGER.error("Error updating serialized lua")

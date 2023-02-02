@@ -10,7 +10,7 @@
                 "main:app",
                 "--reload",
             ],
-            "cwd": "./DCSStatsDataProvider/",
+            "cwd": "${workspaceFolder}/DCSStatsDataProvider/",
             "env": {
                 "PYTHONUNBUFFERED": "1"
             },
