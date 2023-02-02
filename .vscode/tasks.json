@@ -17,7 +17,7 @@
         {
             "label": "Force new docker image build",
             "type": "shell",
-            "command": "docker build --no-cache -t ${IMAGE_NAME}:${input:platform} .",
+            "command": "docker build --no-cache -t ${input:platform} .",
             "problemMatcher": []
         },
         {
@@ -37,18 +37,20 @@
             "type": "shell",
             "command": "pre-commit uninstall",
             "problemMatcher": []
+        },
+        {
+            "label": "Git: remove previously staged files that are now in .gitignore",
+            "type": "shell",
+            "command": "git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached",
+            "problemMatcher": []
         }
     ],
     "inputs": [
         {
           "id": "platform",
-          "type": "pickString",
-          "description": "Build for arm64 or amd64?",
-          "options": [
-            "arm64",
-            "amd64",
-          ],
-          "default": "amd64"
+          "type": "promptString",
+          "description": "Select name and tag",
+          "default": "woulve/dcsstatsdataprovider:amd64"
         }
       ]
 }
