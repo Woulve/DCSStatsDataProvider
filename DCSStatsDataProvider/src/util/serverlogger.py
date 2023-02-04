@@ -13,5 +13,5 @@ def serverLogger():
         format='%(asctime)s.%(msecs)d %(funcName)s:%(lineno)d %(name)s %(levelname)s %(message)s',datefmt='%Y-%m-%d %H:%M:%S',
     )
     LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(logging.INFO)
+    LOGGER.setLevel(logging.DEBUG)
     return LOGGER

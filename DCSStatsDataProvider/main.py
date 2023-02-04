@@ -36,7 +36,9 @@ LOGGER = serverLogger()
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://dcsstats-899a0.web.app"
+    "https://dcsstats-899a0.web.app",
+    "https://vikingsquadron.de",
+    "vikingsquadron.de"
 ]
 
 
@@ -90,21 +92,11 @@ def getDecoded(file, response):
             return luadecoded
 
 def updateWeather():
-    #when enablewebdav and webdavmission is true, we fetch the mission.miz from the webdav server and update the weather in it.
-    #If it is false, we use the local files in the realweather/Active folder.
-    if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
-        if (getFileFromWebDAV("Active/mission.miz", "./src/util/realweather/Active/mission.miz")) == 0:
-            LOGGER.error("Couldn't fetch mission.miz from WEBDav server.")
-            return
+
     update_miz_weather()
 
     mypath = os.path.abspath(os.path.dirname(__file__))
     os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
-
-    if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
-        if (pushFileToWebdav("Active/foothold_remastered_realweather.miz", "./src/util/realweather/Active/foothold_remastered_realweather.miz")) == 0:
-            LOGGER.error("Couldn't push foothold_remastered_realweather.miz to WEBDav server.")
-            return
 
 
 
@@ -115,6 +107,8 @@ rate_limit = "60/minute"
 
 @app.on_event("startup")
 def startup():
+    if (not os.path.isfile("./.env")):
+        raise Exception("No .env file found. Please create one and fill it with the required values.")
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     ENDC = '\033[0m'

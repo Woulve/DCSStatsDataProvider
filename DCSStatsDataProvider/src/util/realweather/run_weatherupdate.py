@@ -4,6 +4,7 @@ from subprocess import PIPE, run
 from src.util.getConfigValue import getConfigValue
 from src.util.serverlogger import serverLogger
 from datetime import datetime, timedelta
+from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 import pathlib
 
 LOGGER = serverLogger()
@@ -41,6 +42,7 @@ def check_if_weather_update_is_needed():
         return True
 
 def update_miz_weather():
+
     #If you want to use real weather, you need to set the CHECKWX_APIKEY environment variables in a .env file in the root folder.
     values = {
         "api-key" : os.getenv("CHECKWX_APIKEY"),
@@ -48,7 +50,7 @@ def update_miz_weather():
         "hour-offset": 0,
         "input-mission-file": "Active/mission.miz",
         "output-mission-file": "Active/foothold_remastered_realweather.miz",
-        "update-time" : False,
+        "update-time" : True if getConfigValue("realweather", "update-time") == "True" else False,
         "update-weather": True,
         "logfile": "logfile.log",
         "metar-remarks": ""
@@ -59,6 +61,11 @@ def update_miz_weather():
 
     if (check_if_weather_update_is_needed() == False):
         return False
+
+    if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
+        if (getFileFromWebDAV("Active/mission.miz", "./src/util/realweather/Active/mission.miz")) == 0:
+            LOGGER.error("Couldn't fetch mission.miz from WEBDav server.")
+            return
 
 
     #Write values to config.json and run realweather
@@ -80,6 +87,11 @@ def update_miz_weather():
             with open("weather_last_time_updated.txt", "w+") as datefile:
                 datefile.write(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                 LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the DCS-real-weather output)")
+
+                if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
+                    if (pushFileToWebdav("Active/foothold_remastered_realweather.miz", "./src/util/realweather/Active/foothold_remastered_realweather.miz")) == 0:
+                        LOGGER.error("Couldn't push foothold_remastered_realweather.miz to WEBDav server.")
+                        return False
             return True
         else:
             LOGGER.error("Error: realweather output didn't contain \"Removed mission_unpacked\". DCS-real-weather output: " + result.stderr)
