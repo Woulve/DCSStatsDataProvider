@@ -87,11 +87,11 @@ def update_miz_weather():
         elif machine == "x86_64" and system == "Linux":
             LOGGER.info("Running realweather for amd64")
             command = ["./src/util/realweather/realweather_amd64", "./src/util/realweather/"]
-        elif machine == "x86_64" and system == "Windows":
+        elif machine == "AMD64" and system == "Windows":
             LOGGER.info("Running realweather for Windows")
             command = ["./src/util/realweather/realweather.exe", "./src/util/realweather/"]
         else:
-            LOGGER.error("Error: Unsupported Architecture.")
+            LOGGER.error("Error: Unsupported Architecture: "+machine + " " + system)
             return False
 
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
