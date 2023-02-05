@@ -78,7 +78,7 @@ def update_miz_weather():
             LOGGER.exception(e)
             return
 
-        command = ["./src/util/realweather/DCS-real-weather", "./src/util/realweather/"]
+        command = ["./src/util/realweather/realweather_amd64", "./src/util/realweather/"]
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
         if "Removed mission_unpacked" in result.stdout:
