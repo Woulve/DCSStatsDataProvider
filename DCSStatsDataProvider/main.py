@@ -123,8 +123,6 @@ def repeated():
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
-    if request.headers.get("h9vQ$GYw4v2Z#D") != 'd%xnC68H*F6!iF':
-        return JSONResponse(status_code=401, content={'detail': 'Unauthorized'})
 
     LOGGER.debug("Processing...")
     start_time = time.time()

@@ -9,8 +9,6 @@ services:
       - 8080:8080
     command:
       - "--log.level=DEBUG"
-      - "--accesslog=true"
-      - "--accesslog.filepath=/etc/traefik/log/access.log"
       - "--api=true"
       - "--api.insecure=false"
       - "--api.dashboard=true"
@@ -46,7 +44,6 @@ services:
         max-file: "3"
 
     volumes:
-      - ./access.log:/etc/traefik/log/access.log
       - ./letsencrypt/acme.json:/etc/traefik/acme/acme.json
       - ./traefik/traefik.log:/etc/traefik/log/traefik.log
       - /var/run/docker.sock:/var/run/docker.sock:ro
