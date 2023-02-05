@@ -25,7 +25,7 @@ def getFileFromWebDAV(file, localpath):
         try:
             client.download_sync(remote_path=file, local_path=localpath)
             LOGGER.info("Successfully fetched "+file+" from WEBDav server to: "+localpath)
-        except WebDavException as e:
+        except Exception as e:
             LOGGER.error("Couldn't fetch file from webdav server: "+str(e))
             return 0
         return 1
@@ -39,7 +39,7 @@ def pushFileToWebdav(remotepath, localpath):
         client.upload_sync(remote_path=remotepath, local_path=localpath)
         LOGGER.info("Successfully pushed "+localpath+" to WEBDav server: "+remotepath)
         return 1
-    except WebDavException as e:
+    except Exception as e:
         LOGGER.error("Couldn't push file to webdav server: "+str(e))
         return 0
 
