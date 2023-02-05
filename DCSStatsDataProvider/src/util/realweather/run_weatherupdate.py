@@ -48,11 +48,11 @@ def update_miz_weather():
         "api-key" : os.getenv("CHECKWX_APIKEY"),
         "icao" : getConfigValue("realweather", "icao"),
         "hour-offset": 0,
-        "input-mission-file": "Active/mission.miz",
-        "output-mission-file": "Active/foothold_remastered_realweather.miz",
+        "input-mission-file": "./src/util/realweather/Active/mission.miz",
+        "output-mission-file": "./src/util/realweather/Active/foothold_remastered_realweather.miz",
         "update-time" : True if getConfigValue("realweather", "update-time") == "True" else False,
         "update-weather": True,
-        "logfile": "logfile.log",
+        "logfile": "./src/util/realweather/weather.log",
         "metar-remarks": ""
     }
 
@@ -71,7 +71,7 @@ def update_miz_weather():
         json_object = json.dumps(values, indent=4)
 
         try:
-            with open("config.json", "w+") as outfile:
+            with open("./src/util/realweather/config.json", "w+") as outfile:
                 outfile.write(json_object)
         except Exception as e:
             LOGGER.error("Error: An error occurred while writing to config.json.")
