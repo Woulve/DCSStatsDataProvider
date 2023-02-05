@@ -91,17 +91,6 @@ def getDecoded(file, response):
         else:
             return luadecoded
 
-def updateWeather():
-
-    update_miz_weather()
-
-    mypath = os.path.abspath(os.path.dirname(__file__))
-    os.chdir(mypath) #change back working directory to this folder, we had to change it in the weather updater so it can find the .json file.
-
-
-
-# luadecoded = getLuaDecoded_slmodStats(luafiles["SlmodStats"], False)
-
 cache_time = 60 * 5 #5 minutes
 rate_limit = "60/minute"
 
@@ -118,7 +107,7 @@ def startup():
 @repeat_every(seconds=60 * 30) #every 30 minutes
 def repeated():
     if getConfigValue("realweather", "enableweatherchanges") == "True":
-        updateWeather() #checks if weather update is needed and updates it if it is.
+        update_miz_weather() #checks if weather update is needed and updates it if it is.
 
     if getConfigValue("webdav", "enablewebdav") == "True":
         if getFileFromWebDAV("Slmod/SlmodStats.lua", "./SlmodStats.lua") == 0:

@@ -29,7 +29,7 @@ def over_24_hours(date1, date2):
 def check_if_weather_update_is_needed():
 
     try:
-        with open("weather_last_time_updated.txt", "r") as datefile:
+        with open("./src/util/realweather/weather_last_time_updated.txt", "r") as datefile:
             last_time_updated = datefile.read()
             if over_24_hours(last_time_updated, datetime.now().strftime("%Y/%m/%d %H:%M:%S")):
                 LOGGER.info("Weather update needed, over 24 hours since last update.")
@@ -56,17 +56,15 @@ def update_miz_weather():
         "metar-remarks": ""
     }
 
-    weatherpath = os.path.abspath(os.path.dirname(__file__))
-    os.chdir(weatherpath)
 
     if (check_if_weather_update_is_needed() == False):
         return False
 
     if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
+        LOGGER.info("Fetching mission.miz from WEBDAV server.")
         if (getFileFromWebDAV("Active/mission.miz", "./src/util/realweather/Active/mission.miz")) == 0:
             LOGGER.error("Couldn't fetch mission.miz from WEBDav server.")
             return
-
 
     #Write values to config.json and run realweather
     try:
@@ -80,11 +78,11 @@ def update_miz_weather():
             LOGGER.exception(e)
             return
 
-        command = [weatherpath+"/DCS-real-weather"]
+        command = ["./src/util/realweather/DCS-real-weather", "./src/util/realweather/"]
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
         if "Removed mission_unpacked" in result.stdout:
-            with open("weather_last_time_updated.txt", "w+") as datefile:
+            with open("./src/util/realweather/weather_last_time_updated.txt", "w+") as datefile:
                 datefile.write(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
                 LOGGER.info("Weather successfully updated. (Found \"Removed mission_unpacked\" in the DCS-real-weather output)")
 
