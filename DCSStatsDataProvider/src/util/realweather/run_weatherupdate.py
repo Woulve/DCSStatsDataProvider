@@ -6,6 +6,7 @@ from src.util.serverlogger import serverLogger
 from datetime import datetime, timedelta
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
 import pathlib
+import platform
 
 LOGGER = serverLogger()
 
@@ -78,7 +79,21 @@ def update_miz_weather():
             LOGGER.exception(e)
             return
 
-        command = ["./src/util/realweather/realweather_amd64", "./src/util/realweather/"]
+        system, node, release, version, machine, processor = platform.uname()
+
+        if machine == "aarch64":
+            LOGGER.info("Running realweather for arm64")
+            command = ["./src/util/realweather/realweather_arm64", "./src/util/realweather/"]
+        elif machine == "x86_64" and system == "Linux":
+            LOGGER.info("Running realweather for amd64")
+            command = ["./src/util/realweather/realweather_amd64", "./src/util/realweather/"]
+        elif machine == "x86_64" and system == "Windows":
+            LOGGER.info("Running realweather for Windows")
+            command = ["./src/util/realweather/realweather.exe", "./src/util/realweather/"]
+        else:
+            LOGGER.error("Error: Unsupported Architecture.")
+            return False
+
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
         if "Removed mission_unpacked" in result.stdout:
