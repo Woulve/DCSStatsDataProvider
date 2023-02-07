@@ -43,6 +43,24 @@
             "type": "shell",
             "command": "git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached",
             "problemMatcher": []
+        },
+        {
+            "label": "Git: assume unchanged for files",
+            "type": "shell",
+            "command": "git update-index --assume-unchanged ${input:assumeunchanged}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: no assume unchanged for files",
+            "type": "shell",
+            "command": "git update-index --no-assume-unchanged ${input:assumechanged}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: list assumed unchanged files",
+            "type": "shell",
+            "command": "git ls-files -v | grep '^[[:lower:]]'",
+            "problemMatcher": []
         }
     ],
     "inputs": [
@@ -51,6 +69,19 @@
           "type": "promptString",
           "description": "Select name and tag",
           "default": "woulve/dcsstatsdataprovider:amd64"
-        }
+        },
+        {
+            "id": "assumeunchanged",
+            "type": "promptString",
+            "description": "Which files to ignore changes for?",
+            "default": ""
+          },
+          {
+            "id": "assumechanged",
+            "type": "promptString",
+            "description": "Which files to track changes again for?",
+            "default": ""
+          },
+
       ]
 }
