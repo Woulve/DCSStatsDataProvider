@@ -6,12 +6,14 @@ from fastapi import FastAPI, Request, HTTPException, Response, Header
 from fastapi.responses import JSONResponse
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi_cache import FastAPICache
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from datetime import date
+from dotenv import load_dotenv
 import base64
 
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
@@ -33,11 +35,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 LOGGER = serverLogger()
+load_dotenv()
 
 origins = [
     "http://localhost:3000",
-    "https://vikingsquadron.de",
-    "vikingsquadron.de",
+    os.getenv("ALLOWED_ORIGIN") or "*"
 ]
 
 
@@ -47,6 +49,13 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
+)
+
+ALLOWED_ORIGINS = [os.getenv("ALLOWED_ORIGIN") or "*"]
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[os.getenv("ALLOWED_HOST") or "*"]
 )
 
 class slmodstatslua():
@@ -107,6 +116,8 @@ rate_limit = "60/minute"
 @app.on_event("startup")
 def startup():
     print_configvalues()
+    if ALLOWED_ORIGINS == ["*"]:
+        LOGGER.warning("Allowing ALL origins! Define origins in .env if exposing this application!")
 
 @app.on_event("startup")
 @repeat_every(seconds=60 * 30) #every 30 minutes
@@ -123,6 +134,9 @@ def repeated():
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
+    if ALLOWED_ORIGINS != ["*"]:
+        if request.headers.get('Origin') not in ALLOWED_ORIGINS:
+            return JSONResponse(status_code = 401, content = "")
 
     LOGGER.debug("Processing...")
     start_time = time.time()
