@@ -138,12 +138,11 @@ async def getData(request: Request, call_next):
         if request.headers.get('Origin') not in ALLOWED_ORIGINS:
             return JSONResponse(status_code = 401, content = "")
 
-    LOGGER.debug("Processing...")
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
-    LOGGER.debug("Processed in "+str(process_time)+" seconds")
+    LOGGER.debug("Request from "+request.client.host+" to "+request.url.path+" processed in "+str(process_time)+" seconds")
     return response
 
 
