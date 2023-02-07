@@ -136,7 +136,7 @@ def repeated():
 async def getData(request: Request, call_next):
     if ALLOWED_ORIGINS != ["*"]:
         if request.headers.get('Origin') not in ALLOWED_ORIGINS:
-            return JSONResponse(status_code = 401, content = "")
+            return JSONResponse(status_code = 200, content = "") #return 200 so I don't have to pay for uptimerobot :)
 
     start_time = time.time()
     response = await call_next(request)
