@@ -51,12 +51,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ALLOWED_ORIGINS = [os.getenv("ALLOWED_ORIGIN") or "*"]
-
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=[os.getenv("ALLOWED_HOST") or "*"]
-)
 
 class slmodstatslua():
     luadecoded = {}
@@ -116,8 +110,6 @@ rate_limit = "60/minute"
 @app.on_event("startup")
 def startup():
     print_configvalues()
-    if ALLOWED_ORIGINS == ["*"]:
-        LOGGER.warning("Allowing ALL origins! Define origins in .env if exposing this application!")
 
 @app.on_event("startup")
 @repeat_every(seconds=60 * 30) #every 30 minutes
@@ -134,10 +126,6 @@ def repeated():
 
 @app.middleware("http")
 async def getData(request: Request, call_next):
-    if ALLOWED_ORIGINS != ["*"]:
-        if request.headers.get('Origin') not in ALLOWED_ORIGINS:
-            return JSONResponse(status_code = 200, content = "") #return 200 so I don't have to pay for uptimerobot :)
-
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
