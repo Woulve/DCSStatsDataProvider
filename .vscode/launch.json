@@ -9,6 +9,8 @@
             "args": [
                 "main:app",
                 "--reload",
+                "--port",
+                "8001",
             ],
             "cwd": "${workspaceFolder}/DCSStatsDataProvider/",
             "env": {
