@@ -13,7 +13,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from datetime import date
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import base64
 
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
@@ -35,11 +35,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 LOGGER = serverLogger()
-load_dotenv()
+# load_dotenv()
 
 origins = [
     "http://localhost:3000",
-    os.getenv("ALLOWED_ORIGIN") or "*"
+    os.getenv("ALLOWED_ORIGIN")
 ]
 
 
@@ -47,7 +47,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
