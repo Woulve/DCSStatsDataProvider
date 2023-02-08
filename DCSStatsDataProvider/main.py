@@ -24,6 +24,8 @@ from src.components.data.SlmodStats.playerData import getPlayersList
 from src.components.data.SlmodStats.playerStats import getPlayerStats
 from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
 from src.components.data.SlmodStats.allPlayerStats import getAllPlayerStats
+from src.components.data.SlmodStats.playerAirplaneList import getPlayerAirplaneList
+from src.components.data.SlmodStats.playerAirplaneStats import getPlayerAirplaneStats
 from src.util.realweather.run_weatherupdate import update_miz_weather
 from src.components.data.SlmodStats.Rankings.playerRankingByFlightTime import getPlayerRankingByFlightTime;
 from src.components.data.SlmodStats.Rankings.playerRankingByPoints import getPlayerRankingByPoints;
@@ -148,6 +150,16 @@ async def PlayersList(request: Request, response: Response):
 @limiter.limit(rate_limit)
 async def PlayersList(name, request: Request, response: Response):
     return {"player" : getPlayerStats(name, getDecoded(request, "SlmodStats"))}
+
+@app.get("/playerairplanelist/{name}")
+@limiter.limit(rate_limit)
+async def PlayersList(name, request: Request, response: Response):
+    return {"airplanes" : getPlayerAirplaneList(name, getDecoded(request, "SlmodStats"))}
+
+@app.get("/playerairplanestats/{name}/{airplane}")
+@limiter.limit(rate_limit)
+async def PlayersList(name, airplane, request: Request, response: Response):
+    return {"airplane_stats" : getPlayerAirplaneStats(name, airplane, getDecoded(request, "SlmodStats"))}
 
 @app.get("/playerbyname/{name}")
 @limiter.limit(rate_limit)
