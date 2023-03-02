@@ -16,6 +16,9 @@ def getPlayerAirplaneList(name, luadecoded):
     for aircraftname, aircraft_data in player_data.get("times", {}).items():
         if aircraftname == "totalFlightTime":
             continue
-        airplane_list.append(aircraftname)
+        airplane_list.append({"name": aircraftname, "flightTime": aircraft_data.get("total", 0)})
+
+    #sort by flight time
+    airplane_list.sort(key=lambda x: x["flightTime"], reverse=True)
 
     return airplane_list

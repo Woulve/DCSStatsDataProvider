@@ -2,7 +2,7 @@ import time
 import uvicorn
 import os
 
-from fastapi import FastAPI, Request, HTTPException, Response, Header
+from fastapi import FastAPI, Path, Request, HTTPException, Response, Header
 from fastapi.responses import JSONResponse
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +27,7 @@ from src.components.data.SlmodStats.allPlayerStats import getAllPlayerStats
 from src.components.data.SlmodStats.playerAirplaneList import getPlayerAirplaneList
 from src.components.data.SlmodStats.playerAirplaneStats import getPlayerAirplaneStats
 from src.util.realweather.run_weatherupdate import update_miz_weather
+from src.util.realweather.getMetar import getMetar
 from src.components.data.SlmodStats.Rankings.playerRankingByFlightTime import getPlayerRankingByFlightTime;
 from src.components.data.SlmodStats.Rankings.playerRankingByPoints import getPlayerRankingByPoints;
 
@@ -141,29 +142,34 @@ async def getData(request: Request, call_next):
 async def root(request: Request, response: Response):
     return {"stats" : getDecoded(request, "SlmodStats")}
 
+@app.get("/metar")
+@limiter.limit(rate_limit)
+async def Metar(request: Request, response: Response):
+    return {"metar" : getMetar()}
+
 @app.get("/players")
 @limiter.limit(rate_limit)
 async def PlayersList(request: Request, response: Response):
     return {"players" : getPlayersList(getDecoded(request, "SlmodStats"))}
 
-@app.get("/player/{name}")
+@app.get("/player/{name:path}")
 @limiter.limit(rate_limit)
-async def PlayersList(name, request: Request, response: Response):
+async def PlayersStats(request: Request, response: Response, name: str):
     return {"player" : getPlayerStats(name, getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerairplanelist/{name}")
+@app.get("/playerairplanelist/{name:path}")
 @limiter.limit(rate_limit)
-async def PlayersList(name, request: Request, response: Response):
+async def PlayerAirplaneList(request: Request, response: Response, name: str):
     return {"airplanes" : getPlayerAirplaneList(name, getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerairplanestats/{name}/{airplane}")
+@app.get("/playerairplanestats/{name:path}/{airplane}")
 @limiter.limit(rate_limit)
-async def PlayersList(name, airplane, request: Request, response: Response):
+async def PlayerAirplaneStats(name: str, airplane, request: Request, response: Response):
     return {"airplane_stats" : getPlayerAirplaneStats(name, airplane, getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerbyname/{name}")
+@app.get("/playerbyname/{name:path}")
 @limiter.limit(rate_limit)
-async def PlayerDataByName(name, request: Request, response: Response):
+async def PlayerDataByName(name: str, request: Request, response: Response):
     return {"UCID" : getPlayerUCIDByName(name, getDecoded(request, "SlmodStats"))}
 
 @app.get("/playerrankingbyflighttime")
