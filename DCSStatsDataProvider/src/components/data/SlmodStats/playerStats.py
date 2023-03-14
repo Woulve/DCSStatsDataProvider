@@ -55,7 +55,8 @@ def getPlayerStats(name, luadecoded):
         for weaponname, weapon_data in aircraft_data.get("weapons", {}).items():
             if weaponname == "shot": #shot sometimes appears as a weapon
                 continue
-            if ( weapon_data.get("kills", 0) > favorite_weapon["kills"] ):
+
+            if isinstance(weapon_data, dict) and weapon_data.get("kills", 0) > favorite_weapon["kills"]:
                 favorite_weapon["name"] = weaponname
                 favorite_weapon["kills"] = weapon_data.get("kills", 0)
 

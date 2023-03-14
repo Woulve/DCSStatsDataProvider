@@ -14,6 +14,7 @@ from slowapi.errors import RateLimitExceeded
 
 from datetime import date
 # from dotenv import load_dotenv
+from urllib.parse import quote, unquote
 import base64
 
 from src.util.webDAV import getFileFromWebDAV, pushFileToWebdav
@@ -152,25 +153,25 @@ async def Metar(request: Request, response: Response):
 async def PlayersList(request: Request, response: Response):
     return {"players" : getPlayersList(getDecoded(request, "SlmodStats"))}
 
-@app.get("/player/{name:path}")
+@app.get("/player/{name}")
 @limiter.limit(rate_limit)
 async def PlayersStats(request: Request, response: Response, name: str):
-    return {"player" : getPlayerStats(name, getDecoded(request, "SlmodStats"))}
+    return {"player" : getPlayerStats(unquote(name), getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerairplanelist/{name:path}")
+@app.get("/playerairplanelist/{name}")
 @limiter.limit(rate_limit)
 async def PlayerAirplaneList(request: Request, response: Response, name: str):
-    return {"airplanes" : getPlayerAirplaneList(name, getDecoded(request, "SlmodStats"))}
+    return {"airplanes" : getPlayerAirplaneList(unquote(name), getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerairplanestats/{name:path}/{airplane}")
+@app.get("/playerairplanestats/{name}/{airplane}")
 @limiter.limit(rate_limit)
 async def PlayerAirplaneStats(name: str, airplane, request: Request, response: Response):
-    return {"airplane_stats" : getPlayerAirplaneStats(name, airplane, getDecoded(request, "SlmodStats"))}
+    return {"airplane_stats" : getPlayerAirplaneStats(unquote(name), unquote(airplane), getDecoded(request, "SlmodStats"))}
 
-@app.get("/playerbyname/{name:path}")
+@app.get("/playerbyname/{name}")
 @limiter.limit(rate_limit)
 async def PlayerDataByName(name: str, request: Request, response: Response):
-    return {"UCID" : getPlayerUCIDByName(name, getDecoded(request, "SlmodStats"))}
+    return {"UCID" : getPlayerUCIDByName(unquote(name), getDecoded(request, "SlmodStats"))}
 
 @app.get("/playerrankingbyflighttime")
 @limiter.limit(rate_limit)
