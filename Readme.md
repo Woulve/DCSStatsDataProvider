@@ -75,6 +75,8 @@ You should now be able to access the backend on http://127.0.0.1:8000
 
 Since this is written with [FastApi](https://fastapi.tiangolo.com/), there is a generated OpenAPI specification, accessible under http://127.0.0.1:8000/docs, containing all the possible REST endpoints.
 
+I am using pre-commit, to run all tests before committing. More information is in the [.pre-commit-config.yaml](.pre-commit-config.yaml) file.
+
 ## 2.3. Docker Setup
 To use the application as a docker container, you have to build the image first with the Dockerfile.
 Either use the VSCode Task I made, or the command ``"docker build --no-cache -t name:tag ."``
