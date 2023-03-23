@@ -1,0 +1,87 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Update requirements.txt",
+            "type": "shell",
+            "command": "pipreqs --force"
+        },
+        {
+            "label": "Get raspberry IP",
+            "type": "shell",
+            "command": "ping raspberrypi.local",
+            "problemMatcher": []
+        },
+        {
+            "label": "Force new docker image build",
+            "type": "shell",
+            "command": "docker build --no-cache -t ${input:platform} .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker down with volume and orphan remove",
+            "type": "shell",
+            "command": "docker-compose down --v --remove-orphans",
+            "problemMatcher": []
+        },
+        {
+            "label": "Enable pre-commit hook",
+            "type": "shell",
+            "command": "pre-commit install",
+            "problemMatcher": []
+        },
+        {
+            "label": "Disable pre-commit hook",
+            "type": "shell",
+            "command": "pre-commit uninstall",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: remove previously staged files that are now in .gitignore",
+            "type": "shell",
+            "command": "git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: assume unchanged for files",
+            "type": "shell",
+            "command": "git update-index --assume-unchanged ${input:assumeunchanged}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: no assume unchanged for files",
+            "type": "shell",
+            "command": "git update-index --no-assume-unchanged ${input:assumechanged}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: list assumed unchanged files",
+            "type": "shell",
+            "command": "git ls-files -v | grep '^[[:lower:]]'",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+          "id": "platform",
+          "type": "promptString",
+          "description": "Select name and tag",
+          "default": "woulve/dcsstatsdataprovider:amd64"
+        },
+        {
+            "id": "assumeunchanged",
+            "type": "promptString",
+            "description": "Which files to ignore changes for?",
+            "default": ""
+          },
+          {
+            "id": "assumechanged",
+            "type": "promptString",
+            "description": "Which files to track changes again for?",
+            "default": ""
+          },
+
+      ]
+}

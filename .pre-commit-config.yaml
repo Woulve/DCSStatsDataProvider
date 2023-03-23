@@ -1,0 +1,14 @@
+#This is for using pre-commit, which automatically runs task before every commit. In this case, it runs the pytests.
+#To install pre-commit, do "pip install pre-commit", and then "pre-commit install" to enable the hook. To disable, do "pre-commit uninstall"
+
+repos:
+  - repo: local
+    hooks:
+    - id: pytest
+      name: pytest
+      stages: [commit]
+      types: [python]
+      language: system
+      pass_filenames: false
+      entry: sh -c "cd DCSStatsDataProvider && pytest"
+      always_run: true
