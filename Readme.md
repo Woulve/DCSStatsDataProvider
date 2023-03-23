@@ -1,4 +1,4 @@
-<h1>Woulve's DCS Stats Backend</h1>
+<h1>Woulve's DCSStatsDataProvider</h1>
 
 - [1. About](#1-about)
 - [2. Setup](#2-setup)
