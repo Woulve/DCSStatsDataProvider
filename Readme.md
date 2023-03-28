@@ -25,8 +25,7 @@ See it in action here: https://vikingsquadron.de/
 - (Almost) Real time updates
 - Pytest e2e & unit Tests
 - Customizable config
-- Realtime Weather updates for DCS - [2. Setup](#2-setup)
-Mission
+- Realtime Weather updates for DCS Mission
 - WebDAV integration to get files from remote server
 - Fully Raspberry Pi compatible
 
