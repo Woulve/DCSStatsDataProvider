@@ -58,6 +58,7 @@ services:
       - 8000:8000
     volumes:
       - ./DCSStatsDataProvider/serverlog.log:/DCSStatsDataProvider/serverlog.log
+      - ./DCSStatsDataProvider/.env:/DCSStatsDataProvider/.env
       - ./DCSStatsDataProvider/config.cfg:/DCSStatsDataProvider/config.cfg
       - ./DCSStatsDataProvider/src/util/realweather/:/DCSStatsDataProvider/src/util/realweather/
       - ./DCSStatsDataProvider/SlmodStats.lua:/DCSStatsDataProvider/SlmodStats.lua
@@ -104,5 +105,4 @@ services:
 
 networks:
   traefik_net:
-    name: traefik_net
     external: true

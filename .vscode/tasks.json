@@ -68,7 +68,7 @@
           "id": "platform",
           "type": "promptString",
           "description": "Select name and tag",
-          "default": "woulve/dcsstatsdataprovider:amd64"
+          "default": "woulve/dcsstatsdataprovider:arm64"
         },
         {
             "id": "assumeunchanged",

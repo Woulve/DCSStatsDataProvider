@@ -61,7 +61,7 @@ def update_miz_weather():
 
     if getConfigValue("realweather", "webdavmission") == "True" and getConfigValue("webdav", "enablewebdav") == "True":
         LOGGER.info("Fetching mission.miz from WEBDAV server.")
-        if (getFileFromWebDAV("Active/mission.miz", getConfigValue("localfiles", "localinputmissionlocation"))) == 0:
+        if (getFileFromWebDAV(getConfigValue("webdav", "remoteinputmissionlocation"), getConfigValue("localfiles", "localinputmissionlocation"))) == 0:
             LOGGER.error("Couldn't fetch mission.miz from WEBDav server.")
             return
 

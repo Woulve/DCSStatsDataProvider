@@ -49,7 +49,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,7 +73,7 @@ class slmodstatslua():
         return self.luadecoded[file]
 
 if getConfigValue("webdav", "enablewebdav") == "True":
-    getFileFromWebDAV("Slmod/SlmodStats.lua", "./SlmodStats.lua")
+    getFileFromWebDAV(getConfigValue("webdav", "remoteslmodstatslua"), "./SlmodStats.lua")
 
 slmodstats = slmodstatslua()
 slmodstats.setLuaDecoded("SlmodStats")
