@@ -16,8 +16,14 @@ def getPlayersList(luadecoded):
 def getPlayerUCIDByName(playerName: str, luadecoded):
     for ucid in luadecoded:
         try:
-            if(playerName.lower() in list(luadecoded[ucid]["names"].values())[-1].lower()):
-                return(ucid)
+            names = luadecoded[ucid]["names"]
+            if names:
+                max_key = max(names.keys())
+                if max_key is not None:
+                    last_name = names[max_key]
+                    if playerName.lower() in last_name.lower():
+                        return ucid
+            # If names is empty, continue to the next ucid
         except Exception as e:
             LOGGER.error("Error getting player UCID by name")
             LOGGER.exception(e)

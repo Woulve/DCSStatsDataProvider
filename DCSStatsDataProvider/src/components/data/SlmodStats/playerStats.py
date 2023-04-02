@@ -32,8 +32,14 @@ def getPlayerStats(name, luadecoded):
         "time": 0,
     }
 
+    player_name = ""
 
-    player_name = player_data["names"][list(player_data["names"].keys())[-1]]
+    names = player_data["names"]
+    if names:
+        max_key = max(names.keys())
+        if max_key is not None:
+            player_name = names[max_key]
+
 
     for aircraftname, aircraft_data in player_data.get("times", {}).items():
         if aircraftname == "totalFlightTime":
@@ -76,5 +82,3 @@ def getPlayerStats(name, luadecoded):
     }
 
     return player_stats
-
-    return aircraft_stats
