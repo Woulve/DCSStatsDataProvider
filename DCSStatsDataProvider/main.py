@@ -43,13 +43,14 @@ LOGGER = serverLogger()
 
 origins = [
     "http://localhost:3000",
-    os.getenv("ALLOWED_ORIGIN")
+    # os.getenv("ALLOWED_ORIGIN")
+    "https://vikingsquadron.de"
 ]
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

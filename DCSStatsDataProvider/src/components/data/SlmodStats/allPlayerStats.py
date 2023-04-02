@@ -13,7 +13,13 @@ def getAllPlayerStats(luadecoded):
         a2akillstotal = 0
         a2gkillstotal = 0
         deathstotal = 0
-        player_name = player_data["names"][list(player_data["names"].keys())[-1]]
+        player_name = ""
+
+        names = player_data["names"]
+        if names:
+            max_key = max(names.keys())
+            if max_key is not None:
+                player_name = names[max_key]
 
         for aircraftname, aircraft_data in player_data.get("times", {}).items():
             if aircraftname == "totalFlightTime":
