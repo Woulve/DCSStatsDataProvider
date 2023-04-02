@@ -7,7 +7,13 @@ def getPlayerRankingByFlightTime(luadecoded):
     playerRanking = {}
     for ucid in luadecoded:
         try:
-            playerRanking[list(luadecoded[ucid]["names"].values())[-1]] = luadecoded[ucid]["times"]["totalFlightTime"]
+            player_name = ""
+            names = luadecoded[ucid]["names"]
+            if names:
+                max_key = max(names.keys())
+                if max_key is not None:
+                    player_name = names[max_key]
+            playerRanking[player_name] = luadecoded[ucid]["times"]["totalFlightTime"]
         except Exception as e:
             LOGGER.error("Error getting player ranking by flight time for UCID: " + ucid)
             LOGGER.exception(e)
