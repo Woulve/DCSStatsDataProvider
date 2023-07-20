@@ -1,6 +1,7 @@
 from slpp import slpp as lua
 from src.util.serverlogger import serverLogger
 import os
+from datetime import datetime
 from fastapi import HTTPException
 from src.util.getConfigValue import getConfigValue
 from src.components.luaparser.readfile import readfile
@@ -24,6 +25,9 @@ def getLuaDecoded_slmodStats(filepath, update):
             updatedLua = updateLuaDecoded(luadecoded_serialized, luadecoded_additions)
             if updatedLua != '':
                 LOGGER.debug("Successfully updated serialized lua")
+                now = datetime.now()
+                with open("lastUpdated.txt", "w") as f:
+                    f.write(now.strftime("%d/%m/%Y %H:%M:%S"))
                 return process(updatedLua["stats"])
             else:
                 LOGGER.error("Error updating serialized lua")

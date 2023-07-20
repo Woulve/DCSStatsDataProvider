@@ -92,6 +92,10 @@ def getDecoded(request, file):
     else:
         return luadecoded
 
+def getLastUpdated():
+    with open("lastUpdated.txt", "r") as f:
+        return f.read()
+
 
 def print_configvalues(): #prints all config values in the console
     d = getAllConfigValues("configuration")
@@ -147,6 +151,11 @@ async def getData(request: Request, call_next):
 @limiter.limit(rate_limit)
 async def root(request: Request, response: Response):
     return {"stats" : getDecoded(request, "SlmodStats")}
+
+@app.get("/lastUpdated")
+@limiter.limit(rate_limit)
+async def lastupdate(request: Request, response: Response):
+    return {"lastUpdated" : getLastUpdated()}
 
 @app.get("/players")
 @limiter.limit(rate_limit)
