@@ -18,9 +18,18 @@ def getPlayerUCIDByName(playerName: str, luadecoded):
         try:
             names = luadecoded[ucid]["names"]
             if names:
-                max_key = max(names.keys())
-                if max_key is not None:
-                    last_name = names[max_key]
+                # Convert keys to integers if possible, otherwise log an error
+                numeric_names = {}
+                for k, v in names.items():
+                    try:
+                        key_int = int(k)
+                        numeric_names[key_int] = v
+                    except ValueError:
+                        LOGGER.error(f"Key in 'names' is not an integer: {k}")
+
+                if numeric_names:
+                    max_key = max(numeric_names.keys())
+                    last_name = numeric_names[max_key]
                     if playerName.lower() in last_name.lower():
                         return ucid
             # If names is empty, continue to the next ucid
@@ -29,3 +38,4 @@ def getPlayerUCIDByName(playerName: str, luadecoded):
             LOGGER.exception(e)
             raise HTTPException(status_code=500)
     raise HTTPException(status_code=404, detail="Player not found")
+

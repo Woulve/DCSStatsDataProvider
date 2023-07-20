@@ -1,17 +1,19 @@
 from src.components.data.SlmodStats.playerData import getPlayerUCIDByName
 from fastapi import FastAPI, Request, HTTPException, Response
+from src.util.serverlogger import serverLogger
+
+LOGGER = serverLogger()
 
 def getPlayerStats(name, luadecoded):
     player_stats = {}
+
     ucid = getPlayerUCIDByName(name, luadecoded)
 
-    if ucid == None:
+    if ucid is None:
         raise HTTPException(status_code=404, detail="Player not found")
 
     if luadecoded is None:
         return None
-
-    player_stats = {}
 
     player_data = luadecoded.get(ucid, [])
     a2akillstotal = 0
@@ -36,10 +38,18 @@ def getPlayerStats(name, luadecoded):
 
     names = player_data["names"]
     if names:
-        max_key = max(names.keys())
-        if max_key is not None:
-            player_name = names[max_key]
+        # Convert keys to integers if possible, otherwise log an error
+        numeric_names = {}
+        for k, v in names.items():
+            try:
+                key_int = int(k)
+                numeric_names[key_int] = v
+            except ValueError:
+                LOGGER.error(f"Key in 'names' is not an integer: {k}")
 
+        if numeric_names:
+            max_key = max(numeric_names.keys())
+            player_name = numeric_names[max_key]
 
     for aircraftname, aircraft_data in player_data.get("times", {}).items():
         if aircraftname == "totalFlightTime":
@@ -49,7 +59,7 @@ def getPlayerStats(name, luadecoded):
         a2gkillstotal += aircraft_data.get("kills", {}).get("Ground Units", {}).get("total", 0)
         a2shipkillstotal += aircraft_data.get("kills", {}).get("Ships", {}).get("total", 0)
         deathstotal += aircraft_data.get("actions", {}).get("losses", {}).get("pilotDeath", 0)
-        if ( aircraft_data.get("total", 0) > fav_plane["time"] ):
+        if aircraft_data.get("total", 0) > fav_plane["time"]:
             fav_plane["name"] = aircraftname
             fav_plane["kills_planes"] = aircraft_data.get("kills", {}).get("Planes", {}).get("total", 0)
             fav_plane["kills_groundunits"] = aircraft_data.get("kills", {}).get("Ground Units", {}).get("total", 0)
@@ -59,7 +69,7 @@ def getPlayerStats(name, luadecoded):
             fav_plane["time"] = aircraft_data.get("total", 0)
 
         for weaponname, weapon_data in aircraft_data.get("weapons", {}).items():
-            if weaponname == "shot": #shot sometimes appears as a weapon
+            if weaponname == "shot":  # shot sometimes appears as a weapon
                 continue
 
             if isinstance(weapon_data, dict) and weapon_data.get("kills", 0) > favorite_weapon["kills"]:
