@@ -13,6 +13,7 @@ services:
       - "--api.insecure=false"
       - "--api.dashboard=true"
       - "--log.filePath=/etc/traefik/log/traefik.log"
+      - "--log.maxSize=50"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
