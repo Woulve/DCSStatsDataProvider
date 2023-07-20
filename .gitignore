@@ -3,6 +3,7 @@ letsencrypt
 traefik
 grafana
 git-crypt-key
+*.log.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

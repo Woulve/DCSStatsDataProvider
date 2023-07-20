@@ -10,13 +10,23 @@ def getPlayerRankingByFlightTime(luadecoded):
             player_name = ""
             names = luadecoded[ucid]["names"]
             if names:
-                max_key = max(names.keys())
-                if max_key is not None:
-                    player_name = names[max_key]
+                # Convert keys to integers if possible, otherwise log an error
+                numeric_names = {}
+                for k, v in names.items():
+                    try:
+                        key_int = int(k)
+                        numeric_names[key_int] = v
+                    except ValueError:
+                        LOGGER.error(f"Key in 'names' is not an integer: {k}")
+
+                if numeric_names:
+                    max_key = max(numeric_names.keys())
+                    player_name = numeric_names[max_key]
+
             playerRanking[player_name] = luadecoded[ucid]["times"]["totalFlightTime"]
         except Exception as e:
             LOGGER.error("Error getting player ranking by flight time for UCID: " + ucid)
             LOGGER.exception(e)
             raise HTTPException(status_code=500)
 
-    return sorted(playerRanking.items(), key=lambda x:x[1], reverse=True)
+    return sorted(playerRanking.items(), key=lambda x: x[1], reverse=True)
